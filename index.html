@@ -1,0 +1,3356 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>CPTI · 网文人格推演测试</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+/* ========== RESET & BASE ========== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  height: 100%; width: 100%;
+  background: #0a0a0a;
+  color: #fff;
+  font-family: 'PingFang SC', 'Microsoft YaHei', 'Inter', sans-serif;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ========== BACKGROUND GLOW ========== */
+.glow-layer {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none; z-index: 0;
+}
+.glow-1 {
+  background: radial-gradient(ellipse 600px 600px at 50% 50%, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0) 70%);
+  animation: breathe1 6s ease-in-out infinite;
+}
+.glow-2 {
+  background: radial-gradient(ellipse 900px 900px at 50% 50%, rgba(255,255,255,0.025) 0%, rgba(255,255,255,0) 60%);
+  animation: breathe2 10s ease-in-out infinite;
+}
+@keyframes breathe1 { 0%,100%{opacity:0.8} 50%{opacity:1} }
+@keyframes breathe2 { 0%,100%{opacity:0.5} 50%{opacity:1} }
+
+/* ========== SCREEN SYSTEM ========== */
+/* 每个 screen 是一个独立的全屏层 */
+.screen {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+  transform: translateY(16px);
+}
+.screen.active {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+/* ========== TOPBAR ========== */
+.topbar {
+  flex-shrink: 0;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  background: linear-gradient(#0a0a0a 80%, transparent);
+  z-index: 2;
+}
+.topbar-btn {
+  width: 36px; height: 36px;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px; background: rgba(255,255,255,0.03);
+  color: rgba(255,255,255,0.6); font-size: 18px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .2s; flex-shrink: 0;
+}
+.topbar-btn:active { background: rgba(255,255,255,0.08); }
+.topbar-title {
+  flex: 1; text-align: center;
+  font-size: 15px; font-weight: 500; color: rgba(255,255,255,0.85);
+  letter-spacing: 2px;
+}
+.topbar-spacer { width: 36px; flex-shrink: 0; }
+
+/* ========== SCROLL BODY ========== */
+/* 每个 screen 的可滚动主体区域 */
+.scroll-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+.scroll-body::-webkit-scrollbar { width: 2px; }
+.scroll-body::-webkit-scrollbar-track { background: transparent; }
+.scroll-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 1px; }
+
+/* ========== BUTTONS ========== */
+.btn-primary {
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; max-width: 320px;
+  padding: 16px 48px; border-radius: 14px;
+  background: linear-gradient(135deg, #fff 0%, rgba(220,230,255,0.9) 100%);
+  color: #0a0a0a;
+  font-size: 16px; font-weight: 600; cursor: pointer;
+  border: none; outline: none;
+  transition: all .25s;
+  letter-spacing: 2px;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 4px 24px rgba(200,220,255,0.08);
+}
+.btn-primary:active { transform: scale(0.97); opacity: 0.9; }
+.btn-primary:disabled { opacity: 0.2; cursor: not-allowed; transform: none; box-shadow: none; }
+.btn-secondary {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 13px 40px; border-radius: 12px;
+  background: transparent; color: #888;
+  font-size: 15px; cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.12); outline: none;
+  transition: all .2s; letter-spacing: 1px;
+}
+.btn-secondary:active { border-color: rgba(255,255,255,0.3); color: #ccc; }
+
+/* ========== SCREEN 0: START ========== */
+#screen-start .scroll-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.start-hero {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 0;
+  width: 100%;
+  text-align: center;
+  padding: 24px 24px 40px;
+}
+.start-chars {
+  display: flex; gap: 12px; margin-bottom: 28px;
+  align-items: flex-end; justify-content: center;
+  position: relative;
+  height: 340px;
+}
+.char-figure {
+  width: 150px; height: 250px;
+  background: rgba(255,255,255,0.02);
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  overflow: visible;
+  opacity: 0.55;
+  transform: scale(0.88);
+  transition: all 0.5s cubic-bezier(0.4,0,0.2,1);
+  position: relative;
+  animation: charGlow 3s ease-in-out infinite alternate;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  border: none;
+}
+.char-figure::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  border: 1.5px solid transparent;
+  background: linear-gradient(135deg, rgba(120,180,255,0.4), rgba(180,120,255,0.1), rgba(120,180,255,0.3), rgba(255,200,100,0.05)) border-box;
+  -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  animation: borderShimmer 4s linear infinite;
+}
+.char-figure::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 17px;
+  border: 1px solid transparent;
+  background: linear-gradient(225deg, transparent 30%, rgba(255,255,255,0.15) 50%, transparent 70%) border-box;
+  -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  animation: borderSweep 5s linear infinite;
+}
+@keyframes borderShimmer {
+  0%   { background-position: 0% 0%, 0% 0%; opacity: 0.6; }
+  50%  { opacity: 1; }
+  100% { background-position: 200% 200%, 0% 0%; opacity: 0.6; }
+}
+@keyframes borderSweep {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+@keyframes charGlow {
+  0%   { box-shadow: 0 0 20px rgba(120,180,255,0.06), 0 0 40px rgba(120,180,255,0.03), inset 0 0 20px rgba(120,180,255,0.02); }
+  100% { box-shadow: 0 0 30px rgba(120,180,255,0.15), 0 0 60px rgba(120,180,255,0.08), inset 0 0 30px rgba(120,180,255,0.05); }
+}
+.char-figure img {
+  width: 180px; height: 320px;
+  object-fit: contain;
+  pointer-events: none;
+  transition: transform 0.5s cubic-bezier(0.4,0,0.2,1);
+  margin-top: 0;
+}
+.char-figure.mid {
+  width: 150px; height: 250px;
+  opacity: 1;
+  transform: scale(1);
+  z-index: 1;
+  animation: charGlowMid 3s ease-in-out infinite alternate;
+}
+.char-figure.mid img {
+  width: 200px; height: 340px;
+  margin-top: 50px;
+}
+.char-figure.mid::before {
+  background: linear-gradient(135deg, rgba(255,255,255,0.5), rgba(180,120,255,0.2), rgba(120,180,255,0.4), rgba(255,200,100,0.15)) border-box;
+  animation: borderShimmerMid 3s linear infinite;
+}
+@keyframes borderShimmerMid {
+  0%   { background-position: 0% 0%, 0% 0%; opacity: 0.7; }
+  50%  { opacity: 1; }
+  100% { background-position: 200% 200%, 0% 0%; opacity: 0.7; }
+}
+@keyframes charGlowMid {
+  0%   { box-shadow: 0 0 30px rgba(255,255,255,0.08), 0 0 60px rgba(120,180,255,0.06), 0 0 90px rgba(120,180,255,0.03), inset 0 0 30px rgba(120,180,255,0.03); }
+  100% { box-shadow: 0 0 40px rgba(255,255,255,0.18), 0 0 80px rgba(120,180,255,0.15), 0 0 120px rgba(120,180,255,0.08), inset 0 0 40px rgba(120,180,255,0.06); }
+}
+.char-figure-placeholder {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px;
+  background: rgba(255,255,255,0.02);
+}
+.start-title-img {
+  width: 280px;
+  height: auto;
+  margin-bottom: 6px;
+  display: block;
+  pointer-events: none;
+}
+.start-desc {
+  font-size: 13px; line-height: 1.9;
+  margin-bottom: 40px;
+  letter-spacing: 1px;
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.15) 0%,
+    rgba(200,220,255,0.5) 20%,
+    rgba(255,255,255,0.8) 40%,
+    rgba(200,220,255,0.5) 60%,
+    rgba(255,255,255,0.15) 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: textShimmer 6s ease-in-out infinite;
+}
+@keyframes textShimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.start-dots {
+  display: flex; gap: 8px; margin-bottom: 28px;
+  align-items: center;
+  height: 8px;
+}
+.dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: rgba(255,255,255,0.12);
+  transition: all 0.3s;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.dot:active { transform: scale(1.3); }
+.dot.active {
+  background: #fff;
+  width: 22px; border-radius: 4px;
+}
+
+/* ========== SCREEN 1: GENDER (HUD 风格) ========== */
+.page-content {
+  padding: 32px 20px 48px;
+  display: flex; flex-direction: column;
+  align-items: center;
+}
+
+/* 频道选择页专属容器 */
+#screen-gender .scroll-body {
+  overflow-y: auto;
+}
+.gender-page-wrap {
+  position: relative;
+  display: flex; flex-direction: column;
+  align-items: center;
+  padding: 20px 16px 120px;
+  min-height: 100%;
+}
+
+/* 背景装饰 — 银色细纹 */
+.gender-bg-deco {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none; overflow: hidden; z-index: 0;
+}
+
+/* 左上角斜向细线组 */
+.gender-bg-deco::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  background:
+    /* 左上斜线 */
+    linear-gradient(135deg, transparent 0%, transparent 18%, rgba(200,210,230,0.07) 18%, rgba(200,210,230,0.07) 18.3%, transparent 18.3%, transparent 36%, rgba(200,210,230,0.04) 36%, rgba(200,210,230,0.04) 36.2%, transparent 36.2%),
+    /* 右下斜线 */
+    linear-gradient(315deg, transparent 0%, transparent 22%, rgba(200,210,230,0.05) 22%, rgba(200,210,230,0.05) 22.2%, transparent 22.2%, transparent 44%, rgba(200,210,230,0.03) 44%, rgba(200,210,230,0.03) 44.15%, transparent 44.15%);
+}
+
+/* 右上角斜线组 */
+.gender-bg-deco::after {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  background:
+    linear-gradient(225deg, transparent 0%, transparent 15%, rgba(220,225,240,0.06) 15%, rgba(220,225,240,0.06) 15.25%, transparent 15.25%, transparent 32%, rgba(220,225,240,0.04) 32%, rgba(220,225,240,0.04) 32.15%, transparent 32.15%),
+    linear-gradient(45deg, transparent 0%, transparent 28%, rgba(210,215,235,0.04) 28%, rgba(210,215,235,0.04) 28.2%, transparent 28.2%);
+}
+
+/* 银色小三角 */
+.gender-bg-tri {
+  position: absolute; bottom: 30%; left: 10px;
+  width: 0; height: 0;
+  border-left: 14px solid transparent;
+  border-right: 14px solid transparent;
+  border-bottom: 24px solid rgba(210,215,235,0.18);
+}
+.gender-bg-tri2 {
+  position: absolute; top: 35%; right: 14px;
+  width: 0; height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 14px solid rgba(200,210,230,0.14);
+}
+.gender-bg-tri3 {
+  position: absolute; top: 55%; left: 24px;
+  width: 0; height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 10px solid rgba(210,215,235,0.12);
+}
+
+/* 额外银色细纹角落装饰 — 右上 */
+.gender-bg-deco .silver-line-tr {
+  position: absolute; top: 60px; right: 0;
+  width: 80px; height: 1px;
+  background: linear-gradient(to left, transparent, rgba(200,215,240,0.25), transparent);
+  transform: rotate(-35deg) translateX(20px);
+}
+.gender-bg-deco .silver-line-tr2 {
+  position: absolute; top: 80px; right: 0;
+  width: 50px; height: 1px;
+  background: linear-gradient(to left, transparent, rgba(200,215,240,0.15), transparent);
+  transform: rotate(-35deg) translateX(10px);
+}
+/* 左下 */
+.gender-bg-deco .silver-line-bl {
+  position: absolute; bottom: 120px; left: 0;
+  width: 80px; height: 1px;
+  background: linear-gradient(to right, transparent, rgba(200,215,240,0.2), transparent);
+  transform: rotate(-35deg) translateX(-20px);
+}
+.gender-bg-deco .silver-line-bl2 {
+  position: absolute; bottom: 105px; left: 0;
+  width: 50px; height: 1px;
+  background: linear-gradient(to right, transparent, rgba(200,215,240,0.12), transparent);
+  transform: rotate(-35deg) translateX(-10px);
+}
+/* 顶部水平细线 */
+.gender-bg-deco .silver-line-top {
+  position: absolute; top: 56px; left: 10%; right: 10%;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(200,215,240,0.1) 30%, rgba(200,215,240,0.18) 50%, rgba(200,215,240,0.1) 70%, transparent);
+}
+/* 底部水平细线 */
+.gender-bg-deco .silver-line-bot {
+  position: absolute; bottom: 100px; left: 5%; right: 5%;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(200,215,240,0.08) 30%, rgba(200,215,240,0.14) 50%, rgba(200,215,240,0.08) 70%, transparent);
+}
+
+/* 顶部标签 */
+.gender-top-label {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; color: rgba(255,255,255,0.4);
+  letter-spacing: 3px; margin-bottom: 16px;
+  position: relative; z-index: 1;
+}
+.gender-top-label::before, .gender-top-label::after {
+  content: '—';
+  color: rgba(255,255,255,0.2);
+}
+
+/* 大标题 */
+.gender-big-title {
+  font-size: 32px; font-weight: 900; color: #fff;
+  text-align: center; margin-bottom: 14px;
+  letter-spacing: 2px; line-height: 1.2;
+  position: relative; z-index: 1;
+  text-shadow: 0 0 30px rgba(255,255,255,0.08);
+}
+.gender-big-title .hl {
+  background: linear-gradient(135deg, #e8eaf0 0%, #ffffff 40%, #b0bcd0 70%, #dce2ee 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 10px rgba(220,230,255,0.7)) drop-shadow(0 0 20px rgba(180,200,240,0.4));
+}
+
+/* 副标题 */
+.section-title {
+  font-size: 22px; font-weight: 700; color: #fff;
+  text-align: center; margin-bottom: 8px;
+  letter-spacing: 2px;
+  background: linear-gradient(135deg, #fff 0%, rgba(180,200,255,0.8) 50%, #fff 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: textShimmer 6s ease-in-out infinite;
+}
+/* 下一步按钮 - 银色渐变宽圆角 */
+.btn-gender-next-wrap {
+  position: relative; z-index: 1;
+  width: 100%; max-width: 320px;
+  margin-top: 4px;
+}
+.btn-gender-next-wrap .btn-primary {
+  background: linear-gradient(90deg, #4a5060 0%, #8a96aa 30%, #c8d0e0 55%, #8a96aa 75%, #4a5060 100%);
+  background-size: 200% 100%;
+  color: #0a0a10;
+  border-radius: 50px;
+  padding: 16px 48px;
+  font-size: 18px; font-weight: 700;
+  letter-spacing: 4px;
+  box-shadow:
+    0 4px 24px rgba(140,150,180,0.35),
+    0 0 0 1px rgba(200,215,240,0.25),
+    inset 0 1px 0 rgba(255,255,255,0.3);
+  transition: all 0.3s;
+  animation: btnSilverShift 4s ease-in-out infinite;
+}
+.btn-gender-next-wrap .btn-primary:not(:disabled):active {
+  transform: scale(0.97); opacity: 0.9;
+}
+.btn-gender-next-wrap .btn-primary:disabled {
+  opacity: 0.3;
+  background: linear-gradient(90deg, #2a2e38, #4a5060);
+  box-shadow: none; cursor: not-allowed; color: #888;
+}
+@keyframes btnSilverShift {
+  0%,100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
+}
+.btn-next-chevron {
+  display: inline-block; margin-left: 6px;
+  font-style: normal; font-size: 18px;
+  letter-spacing: -2px;
+}
+
+/* 菱形装饰点 */
+.gender-diamond {
+  display: inline-block;
+  width: 6px; height: 6px;
+  background: rgba(200,215,240,0.55);
+  transform: rotate(45deg);
+  margin: 0 4px;
+  box-shadow: 0 0 6px rgba(200,220,255,0.4);
+}
+.gender-diamond-row {
+  display: flex; align-items: center; justify-content: center;
+  gap: 0; margin-bottom: 20px; margin-top: 6px;
+  position: relative; z-index: 1;
+}
+
+/* 中间卡片默认突出 */
+.gender-card.mid-default {
+  transform: scale(1.03);
+  border-color: rgba(200,200,220,0.35);
+  box-shadow: 0 0 16px rgba(180,180,220,0.12);
+}
+.gender-card.mid-default .gender-card-bar {
+  left: 10%; right: 10%;
+  background: linear-gradient(90deg, transparent, rgba(180,180,220,0.5), transparent);
+}
+
+.section-sub {
+  font-size: 13px; text-align: center;
+  margin-bottom: 36px;
+  color: rgba(255,255,255,0.3);
+  letter-spacing: 1px;
+}
+/* HUD 卡片网格 */
+.gender-grid {
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px; width: 100%; max-width: 360px;
+  margin-bottom: 36px;
+  position: relative; z-index: 1;
+}
+.gender-card {
+  /* HUD 基底 */
+  background: rgba(8,8,16,0.85);
+  border-radius: 14px;
+  padding: 0 0 20px;
+  display: flex; flex-direction: column; align-items: center;
+  cursor: pointer;
+  transition: all .3s cubic-bezier(0.4,0,0.2,1);
+  position: relative;
+  -webkit-tap-highlight-color: transparent;
+  overflow: hidden;
+  /* 默认银灰边框 */
+  border: 1.5px solid rgba(180,180,200,0.2);
+  min-height: 200px;
+}
+
+/* 外发光层 */
+.gender-card::after {
+  content: '';
+  position: absolute; inset: -1px;
+  border-radius: 15px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+
+/* 四角 HUD 角标 */
+.gender-card .hud-corner {
+  position: absolute;
+  width: 10px; height: 10px;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+.gender-card .hud-corner.tl { top: 5px; left: 5px; border-top: 1.5px solid rgba(180,180,200,0.5); border-left: 1.5px solid rgba(180,180,200,0.5); }
+.gender-card .hud-corner.tr { top: 5px; right: 5px; border-top: 1.5px solid rgba(180,180,200,0.5); border-right: 1.5px solid rgba(180,180,200,0.5); }
+.gender-card .hud-corner.bl { bottom: 5px; left: 5px; border-bottom: 1.5px solid rgba(180,180,200,0.5); border-left: 1.5px solid rgba(180,180,200,0.5); }
+.gender-card .hud-corner.br { bottom: 5px; right: 5px; border-bottom: 1.5px solid rgba(180,180,200,0.5); border-right: 1.5px solid rgba(180,180,200,0.5); }
+
+/* 图标区 */
+.gender-icon-wrap {
+  width: 100%;
+  aspect-ratio: 0.72;
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 10px;
+  flex-shrink: 0;
+}
+.gender-icon-bg {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 80% 80% at 50% 60%, rgba(100,80,160,0.12) 0%, transparent 70%);
+  transition: background 0.3s;
+}
+.gender-icon-wrap svg {
+  position: relative; z-index: 1;
+  width: 60%; height: 60%;
+  filter: drop-shadow(0 0 10px rgba(180,180,220,0.3));
+  transition: filter 0.3s;
+}
+
+/* 名称 */
+.gender-name {
+  font-size: 16px; font-weight: 700; color: #fff;
+  letter-spacing: 2px; text-align: center;
+  display: flex; align-items: center; gap: 5px;
+  margin-bottom: 6px;
+}
+.gender-name-arrow {
+  display: inline-block;
+  width: 0; height: 0;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  border-left: 6px solid rgba(180,180,220,0.5);
+  margin-right: 2px;
+}
+
+/* 提示文字 */
+.gender-hint {
+  font-size: 11px; color: rgba(255,255,255,0.3);
+  text-align: center; line-height: 1.7;
+  padding: 0 6px;
+}
+
+/* 底部光条 */
+.gender-card-bar {
+  position: absolute; bottom: 0; left: 20%; right: 20%;
+  height: 2px;
+  background: rgba(120,120,180,0.3);
+  border-radius: 1px;
+  transition: background 0.3s, left 0.3s, right 0.3s;
+}
+
+/* 选中态 — 银色光效 */
+.gender-card.selected {
+  border-color: rgba(200,215,240,0.7);
+  background: rgba(8,10,18,0.95);
+  transform: scale(1.04);
+  box-shadow:
+    0 0 0 1px rgba(200,215,240,0.25),
+    0 0 18px rgba(200,215,240,0.2),
+    0 0 45px rgba(160,180,220,0.1),
+    inset 0 0 20px rgba(200,215,240,0.04);
+}
+.gender-card.selected .hud-corner.tl,
+.gender-card.selected .hud-corner.tr,
+.gender-card.selected .hud-corner.bl,
+.gender-card.selected .hud-corner.br {
+  border-color: rgba(210,225,250,0.85);
+}
+.gender-card.selected .gender-icon-bg {
+  background: radial-gradient(ellipse 80% 80% at 50% 60%, rgba(200,215,240,0.12) 0%, transparent 70%);
+}
+.gender-card.selected .gender-icon-wrap svg {
+  filter: drop-shadow(0 0 12px rgba(210,225,250,0.65)) drop-shadow(0 0 28px rgba(180,200,240,0.35));
+}
+.gender-card.selected .gender-name-arrow {
+  border-left-color: rgba(210,225,250,0.9);
+}
+.gender-card.selected .gender-card-bar {
+  left: 10%; right: 10%;
+  background: linear-gradient(90deg, transparent, rgba(210,225,250,0.75), transparent);
+}
+
+.gender-card:active:not(.selected) { transform: scale(0.97); }
+
+/* ========== SCREEN 2: GENRE (HUD 风格) ========== */
+#screen-genre .scroll-body { overflow-y: auto; }
+.genre-page-wrap {
+  position: relative;
+  display: flex; flex-direction: column;
+  align-items: center;
+  padding: 20px 16px 120px;
+  min-height: 100%;
+}
+
+/* 背景暗纹 — 替换为图片 */
+.genre-bg-deco {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none; overflow: hidden; z-index: 0;
+  background-image: url('genre-bg.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.7;
+}
+
+/* 银色小三角装饰 */
+.genre-bg-tri {
+  position: absolute; bottom: 25%; left: 12px;
+  width: 0; height: 0;
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-bottom: 20px solid rgba(210,215,235,0.15);
+}
+.genre-bg-tri2 {
+  position: absolute; top: 30%; right: 16px;
+  width: 0; height: 0;
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-bottom: 12px solid rgba(200,210,230,0.12);
+}
+.genre-bg-tri3 {
+  position: absolute; top: 50%; left: 20px;
+  width: 0; height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 9px solid rgba(210,215,235,0.1);
+}
+.genre-bg-tri4 {
+  position: absolute; bottom: 45%; right: 30px;
+  width: 0; height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-bottom: 7px solid rgba(200,210,230,0.08);
+}
+
+/* 银色细纹角落装饰 — 右上 */
+.genre-bg-deco .silver-line-tr {
+  position: absolute; top: 65px; right: 0;
+  width: 70px; height: 1px;
+  background: linear-gradient(to left, transparent, rgba(200,215,240,0.2), transparent);
+  transform: rotate(-35deg) translateX(20px);
+}
+.genre-bg-deco .silver-line-tr2 {
+  position: absolute; top: 85px; right: 0;
+  width: 45px; height: 1px;
+  background: linear-gradient(to left, transparent, rgba(200,215,240,0.12), transparent);
+  transform: rotate(-35deg) translateX(10px);
+}
+/* 左下 */
+.genre-bg-deco .silver-line-bl {
+  position: absolute; bottom: 110px; left: 0;
+  width: 70px; height: 1px;
+  background: linear-gradient(to right, transparent, rgba(200,215,240,0.18), transparent);
+  transform: rotate(-35deg) translateX(-20px);
+}
+.genre-bg-deco .silver-line-bl2 {
+  position: absolute; bottom: 95px; left: 0;
+  width: 45px; height: 1px;
+  background: linear-gradient(to right, transparent, rgba(200,215,240,0.1), transparent);
+  transform: rotate(-35deg) translateX(-10px);
+}
+/* 顶部水平细线 */
+.genre-bg-deco .silver-line-top {
+  position: absolute; top: 56px; left: 10%; right: 10%;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(200,215,240,0.08) 30%, rgba(200,215,240,0.15) 50%, rgba(200,215,240,0.08) 70%, transparent);
+}
+/* 底部水平细线 */
+.genre-bg-deco .silver-line-bot {
+  position: absolute; bottom: 90px; left: 5%; right: 5%;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(200,215,240,0.06) 30%, rgba(200,215,240,0.1) 50%, rgba(200,215,240,0.06) 70%, transparent);
+}
+
+/* 页面标题区 */
+.genre-header {
+  width: 100%; max-width: 400px;
+  text-align: center; margin-bottom: 28px;
+  position: relative; z-index: 1;
+}
+.genre-header-rule {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 14px;
+}
+.genre-header-line {
+  flex: 1; height: 1px;
+  background: linear-gradient(to right, transparent, rgba(200,210,230,0.2), transparent);
+}
+.genre-header-dot {
+  width: 4px; height: 4px; border-radius: 50%;
+  background: rgba(200,215,240,0.5);
+  flex-shrink: 0;
+}
+.genre-title {
+  font-size: 26px; font-weight: 800; color: #fff;
+  letter-spacing: 3px; text-align: center;
+  line-height: 1.2;
+  text-shadow: 0 0 24px rgba(255,255,255,0.08);
+}
+.genre-tip {
+  font-size: 12px; color: rgba(255,255,255,0.25); text-align: center;
+  margin-top: 10px; letter-spacing: 1px;
+}
+.genre-tip span { color: rgba(200,215,240,0.7); }
+
+/* 流派标签网格 */
+.genre-grid {
+  display: flex; flex-wrap: wrap; gap: 10px;
+  justify-content: center; margin-bottom: 36px;
+  width: 100%; max-width: 400px;
+  position: relative; z-index: 1;
+}
+
+/* 八边形流派标签 */
+.genre-tag {
+  /* 八边形 clip-path */
+  clip-path: polygon(14% 0%, 86% 0%, 100% 14%, 100% 86%, 86% 100%, 14% 100%, 0% 86%, 0% 14%);
+  -webkit-clip-path: polygon(14% 0%, 86% 0%, 100% 14%, 100% 86%, 86% 100%, 14% 100%, 0% 86%, 0% 14%);
+
+  display: flex; align-items: center; gap: 8px;
+  padding: 11px 20px;
+  background: rgba(8,8,14,0.85);
+  border: none;
+  cursor: pointer;
+  transition: all .3s cubic-bezier(0.4,0,0.2,1);
+  position: relative;
+  user-select: none; -webkit-tap-highlight-color: transparent;
+
+  /* 默认暗态 */
+  opacity: 0.7;
+  filter: saturate(0.5);
+  box-shadow: 0 0 8px rgba(180,200,230,0.15), inset 0 0 12px rgba(180,200,230,0.05);
+}
+
+/* 多层边框效果 */
+.genre-tag::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  clip-path: polygon(14% 0%, 86% 0%, 100% 14%, 100% 86%, 86% 100%, 14% 100%, 0% 86%, 0% 14%);
+  -webkit-clip-path: polygon(14% 0%, 86% 0%, 100% 14%, 100% 86%, 86% 100%, 14% 100%, 0% 86%, 0% 14%);
+  background: linear-gradient(135deg, rgba(200,215,240,0.5) 0%, rgba(160,185,220,0.3) 50%, rgba(200,215,240,0.5) 100%);
+  padding: 1.5px;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  transition: all 0.3s;
+}
+
+/* 内发光层 */
+.genre-tag::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  clip-path: polygon(14% 0%, 86% 0%, 100% 14%, 100% 86%, 86% 100%, 14% 100%, 0% 86%, 0% 14%);
+  -webkit-clip-path: polygon(14% 0%, 86% 0%, 100% 14%, 100% 86%, 86% 100%, 14% 100%, 0% 86%, 0% 14%);
+  background: radial-gradient(ellipse 60% 50% at 50% 30%, rgba(180,200,230,0.15) 0%, transparent 70%);
+  pointer-events: none;
+  transition: all 0.3s;
+}
+
+.genre-tag:active { transform: scale(0.95); }
+
+/* 左上角小三角装饰 */
+.genre-tag .tag-corner {
+  position: absolute; top: 5px; left: 7px;
+  width: 0; height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 8px solid rgba(180,195,215,0.25);
+  transition: border-color 0.3s;
+  z-index: 1;
+}
+
+/* 悬浮态 */
+.genre-tag:hover:not(.selected):not(.maxed) {
+  opacity: 0.9;
+  filter: saturate(0.75);
+  box-shadow: 0 0 16px rgba(180,200,230,0.25), inset 0 0 15px rgba(180,200,230,0.08);
+}
+.genre-tag:hover:not(.selected):not(.maxed)::before {
+  background: linear-gradient(135deg, rgba(210,225,245,0.6) 0%, rgba(170,195,230,0.35) 50%, rgba(210,225,245,0.55) 100%);
+}
+
+/* 选中态 */
+.genre-tag.selected {
+  opacity: 1;
+  filter: saturate(1) brightness(1.1);
+  background: rgba(12,16,28,0.95);
+  transform: scale(1.04);
+  box-shadow: 0 0 20px rgba(180,200,230,0.35), 0 0 40px rgba(180,200,230,0.15), inset 0 0 15px rgba(180,200,230,0.1);
+}
+.genre-tag.selected::before {
+  background: linear-gradient(135deg, rgba(200,220,245,0.8) 0%, rgba(170,200,235,0.5) 50%, rgba(200,220,245,0.75) 100%);
+  box-shadow: 0 0 12px rgba(180,200,235,0.5);
+}
+.genre-tag.selected::after {
+  background: radial-gradient(ellipse 80% 60% at 50% 30%, rgba(200,220,245,0.2) 0%, rgba(160,190,230,0.08) 50%, transparent 70%);
+}
+.genre-tag.selected .tag-corner {
+  border-bottom-color: rgba(180,200,235,0.9);
+  filter: drop-shadow(0 0 5px rgba(180,200,235,0.7));
+}
+
+/* 标签内图标 */
+.genre-tag-icon {
+  width: 16px; height: 16px;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0.8;
+  transition: all 0.3s;
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,0.3));
+  position: relative; z-index: 1;
+}
+.genre-tag.selected .genre-tag-icon {
+  opacity: 1;
+  filter: drop-shadow(0 0 8px rgba(180,200,235,0.8)) drop-shadow(0 1px 1px rgba(0,0,0,0.3));
+}
+
+/* 标签文字 */
+.genre-tag-text {
+  font-size: 14px; font-weight: 600; color: rgba(210,220,240,0.85);
+  letter-spacing: 1.5px; white-space: nowrap;
+  transition: all 0.3s;
+  position: relative; z-index: 1;
+  text-shadow: 0 0 6px rgba(180,200,235,0.3), 0 1px 3px rgba(0,0,0,0.5);
+}
+.genre-tag.selected .genre-tag-text {
+  color: rgba(230,240,255,1);
+  text-shadow: 0 0 12px rgba(180,200,235,0.6), 0 1px 3px rgba(0,0,0,0.5);
+}
+
+/* 禁用态 */
+.genre-tag.maxed:not(.selected) {
+  opacity: 0.15; cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* 开始推演按钮 */
+.genre-btn-wrap {
+  position: relative; z-index: 1;
+  width: 100%; max-width: 360px;
+}
+.genre-btn-start {
+  position: relative;
+  width: 100%; padding: 16px 48px;
+  border-radius: 14px;
+  background: rgba(8,10,16,0.95);
+  border: none;
+  color: rgba(200,215,240,0.9);
+  font-size: 16px; font-weight: 700;
+  letter-spacing: 4px; cursor: pointer;
+  overflow: hidden;
+  transition: all 0.3s;
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+
+  /* 多层质感边框 */
+  box-shadow:
+    inset 0 0 0 1.5px rgba(180,200,230,0.3),
+    inset 0 1px 0 rgba(255,255,255,0.08),
+    0 0 20px rgba(180,200,230,0.08);
+}
+
+/* 边框装饰层 */
+.genre-btn-start::before {
+  content: '';
+  position: absolute; inset: 0;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(200,220,255,0.15) 0%, transparent 40%, transparent 60%, rgba(180,200,240,0.1) 100%);
+  padding: 1.5px;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* 斜纹背景 */
+.genre-btn-start::after {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 5px,
+      rgba(180,200,230,0.035) 5px,
+      rgba(180,200,230,0.035) 6px
+    );
+  pointer-events: none;
+  border-radius: 14px;
+}
+
+/* 内发光效果 */
+.genre-btn-inner-glow {
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 50%;
+  background: radial-gradient(ellipse 100% 100% at 50% 0%, rgba(200,215,240,0.12) 0%, transparent 70%);
+  pointer-events: none;
+  border-radius: 14px 14px 0 0;
+}
+
+.genre-btn-start:not(:disabled):active {
+  transform: scale(0.97); opacity: 0.85;
+}
+.genre-btn-start:disabled {
+  opacity: 0.2; cursor: not-allowed;
+  box-shadow:
+    inset 0 0 0 1px rgba(180,200,230,0.08),
+    0 0 10px rgba(180,200,230,0.03);
+}
+.genre-btn-slash {
+  display: flex; gap: 3px; align-items: center;
+  opacity: 0.45; font-size: 18px; font-weight: 300;
+  letter-spacing: -2px;
+  position: relative; z-index: 1;
+  text-shadow: 0 0 6px rgba(180,200,230,0.4);
+}
+.genre-btn-start:not(:disabled) .genre-btn-slash {
+  opacity: 0.65;
+  text-shadow: 0 0 8px rgba(180,200,240,0.5);
+}
+
+/* ========== SCREEN 3: QUIZ ========== */
+#screen-quiz .scroll-body { padding-top: 0; }
+.quiz-inner {
+  padding: 8px 20px 48px;
+  max-width: 500px; margin: 0 auto;
+}
+.quiz-meta {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 10px;
+}
+.quiz-dim { font-size: 12px; color: #555; letter-spacing: 1px; }
+.quiz-progress-num { font-size: 12px; color: #555; }
+.progress-bar {
+  width: 100%; height: 2px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 1px; margin-bottom: 32px; overflow: hidden;
+}
+/* ========== SCREEN 3: QUIZ ========== */
+#screen-quiz {
+  background-color: #0b0914;
+  background-image: 
+    radial-gradient(circle at 50% 0%, rgba(80, 80, 95, 0.3) 0%, transparent 50%),
+    linear-gradient(to bottom, #0b0b0f, #060608);
+}
+
+.quiz-inner {
+  max-width: 450px;
+  margin: 0 auto;
+  padding: 72px 16px 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+}
+
+.quiz-header {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.quiz-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  position: relative;
+}
+
+.quiz-title-line {
+  height: 1px;
+  width: 48px;
+  background: linear-gradient(to right, transparent, rgba(200,200,220,0.5));
+}
+.quiz-title-line.left { background: linear-gradient(to left, transparent, rgba(200,200,220,0.5)); }
+
+.quiz-title-diamond {
+  width: 6px;
+  height: 6px;
+  background: rgba(200,210,230,0.8);
+  transform: rotate(45deg);
+  box-shadow: 0 0 8px rgba(200,210,230,0.5);
+}
+
+.quiz-title-text {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  color: #fff;
+  text-shadow: 0 0 8px rgba(255,255,255,0.5);
+}
+
+.quiz-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+  padding-top: 8px;
+}
+
+.quiz-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 0 4px;
+}
+
+.quiz-dim {
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(200,200,220,0.6);
+  letter-spacing: 2px;
+}
+
+.quiz-progress-num {
+  font-size: 14px;
+  font-weight: 700;
+  color: rgba(220,220,240,0.9);
+  letter-spacing: 3px;
+}
+
+.quiz-progress-wrap {
+  position: relative;
+  padding-top: 8px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 4px;
+  background: rgba(60,60,70,0.5);
+  border-radius: 2px;
+  overflow: visible;
+  position: relative;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #a0a0b0, #e0e0f0);
+  border-radius: 2px;
+  box-shadow: 0 0 8px rgba(180,180,200,0.8);
+  transition: width 0.5s ease-out;
+}
+
+.progress-dot {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: #e0e0f0;
+  border-radius: 50%;
+  box-shadow: 0 0 8px 2px rgba(160,160,180,0.8);
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.progress-dot.start { left: 0; }
+.progress-dot.end { right: 0; left: auto; transform: translate(50%, -50%); background: rgba(160,160,180,0.5); box-shadow: none; }
+
+.quiz-question-section {
+  padding: 24px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.quiz-quote {
+  font-size: 20px;
+  color: rgba(200,200,220,0.5);
+  font-weight: 400;
+}
+
+.quiz-question {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  line-height: 1.6;
+  color: rgba(230,230,245,0.95);
+}
+
+.quiz-options {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.option-btn {
+  position: relative;
+  width: 100%;
+  padding: 16px 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: linear-gradient(90deg, rgba(25, 25, 30, 0.8) 0%, rgba(15, 15, 20, 0.8) 100%);
+  border: 1px solid rgba(100, 100, 115, 0.5);
+  clip-path: polygon(
+    10px 0, calc(100% - 10px) 0, 100% 10px, 
+    100% calc(100% - 10px), calc(100% - 10px) 100%, 
+    10px 100%, 0 calc(100% - 10px), 0 10px
+  );
+  transition: all 0.3s ease;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.option-btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  border: 1px solid transparent;
+  background: linear-gradient(180deg, rgba(200, 200, 215, 0.3) 0%, transparent 100%) border-box;
+  -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: destination-out;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.option-btn.visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.3s ease-out, transform 0.3s ease-out,
+              border-color 0.3s, color 0.3s, background 0.3s;
+}
+
+.option-btn:hover {
+  background: linear-gradient(90deg, rgba(35, 35, 45, 0.8) 0%, rgba(20, 20, 30, 0.8) 100%);
+  border-color: rgba(160, 160, 180, 0.8);
+  box-shadow: 0 0 15px rgba(160, 160, 180, 0.3);
+}
+
+.option-btn:active:not(.disabled):not(.selected) {
+  border-color: rgba(200,200,220,0.3);
+  background: rgba(255,255,255,0.05);
+}
+
+.option-btn.selected {
+  border-color: rgba(200, 200, 220, 0.6);
+  background: linear-gradient(90deg, rgba(40, 40, 50, 0.9) 0%, rgba(25, 25, 35, 0.9) 100%);
+  box-shadow: 0 0 20px rgba(160, 160, 180, 0.2);
+  color: #fff;
+}
+
+.option-btn.selected::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 15%;
+  bottom: 15%;
+  width: 2px;
+  background: linear-gradient(to bottom, rgba(220,220,240,0.8), rgba(200,200,220,0.4));
+  border-radius: 1px;
+}
+
+.option-btn.disabled:not(.selected) {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.option-icon {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  background: rgba(30, 30, 35, 0.8);
+  border: 1px solid rgba(130, 130, 145, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.option-icon svg {
+  width: 24px;
+  height: 24px;
+  color: rgba(200,210,230,0.9);
+  filter: drop-shadow(0 0 5px rgba(200,210,230,0.8));
+}
+
+.option-text {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  color: rgba(210,210,225,0.9);
+  text-align: left;
+  line-height: 1.5;
+  transition: color 0.2s;
+}
+
+.option-btn:hover .option-text {
+  color: #fff;
+}
+
+.option-dots {
+  display: flex;
+  gap: 4px;
+  opacity: 0.3;
+  transition: opacity 0.2s;
+}
+
+.option-btn:hover .option-dots {
+  opacity: 0.6;
+}
+
+.option-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(180,180,200,0.7);
+}
+
+.quiz-nav {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+  max-width: 400px;
+  margin-top: 32px;
+}
+
+.quiz-nav-btn {
+  flex: 1;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(20, 20, 25, 0.8);
+  border: 1px solid rgba(120, 120, 135, 0.5);
+  clip-path: polygon(
+    15px 0, calc(100% - 15px) 0, 100% 15px, 
+    100% calc(100% - 15px), calc(100% - 15px) 100%, 
+    15px 100%, 0 calc(100% - 15px), 0 15px
+  );
+  color: rgba(200,200,215,0.5);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all 0.3s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.quiz-nav-btn:hover {
+  color: rgba(220,220,235,0.8);
+  background: rgba(30,30,40,0.8);
+}
+
+.quiz-nav-btn:active:not(:disabled) {
+  background: rgba(40,40,50,0.8);
+}
+
+.quiz-nav-btn:disabled {
+  opacity: 0.2;
+  cursor: not-allowed;
+}
+
+.quiz-nav-btn.primary {
+  background: linear-gradient(90deg, rgba(60, 60, 75, 0.9) 0%, rgba(35, 35, 45, 0.9) 100%);
+  border-color: rgba(180, 180, 200, 0.7);
+  color: #fff;
+  box-shadow: inset 0 0 12px rgba(180,180,200,0.2), 0 0 15px rgba(120,120,140,0.3);
+}
+
+.quiz-nav-btn.primary:hover {
+  filter: brightness(1.1);
+  box-shadow: inset 0 0 15px rgba(200,200,220,0.25), 0 0 20px rgba(140,140,160,0.4);
+}
+
+.nav-btn-quote {
+  font-size: 12px;
+  opacity: 0.5;
+  letter-spacing: 0;
+}
+
+.quiz-bg-lines {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.08;
+  background-image: 
+    linear-gradient(45deg, transparent 48%, rgba(255,255,255,0.8) 50%, transparent 52%),
+    linear-gradient(-45deg, transparent 48%, rgba(255,255,255,0.8) 50%, transparent 52%);
+  background-size: 60px 60px;
+}
+
+/* ========== SCREEN 4: LOADING ========== */
+#screen-loading .scroll-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.loading-ring {
+  width: 56px; height: 56px;
+  border: 2px solid rgba(255,255,255,0.08);
+  border-top-color: rgba(255,255,255,0.6);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 28px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text {
+  font-size: 18px; font-weight: 600; color: #fff;
+  letter-spacing: 2px; margin-bottom: 12px;
+}
+.loading-dots span {
+  display: inline-block; width: 4px; height: 4px;
+  background: #555; border-radius: 50%; margin: 0 3px;
+  animation: dotBounce 1.2s ease-in-out infinite;
+}
+.loading-dots span:nth-child(2) { animation-delay: .2s; }
+.loading-dots span:nth-child(3) { animation-delay: .4s; }
+@keyframes dotBounce {
+  0%,80%,100%{transform:scale(0.6);opacity:0.4}
+  40%{transform:scale(1.3);opacity:1}
+}
+
+/* ========== SCREEN 5: RESULT ========== */
+#screen-result {
+  background: url('res-bg.png') center center / cover no-repeat;
+}
+#screen-result::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: rgba(5,5,10,0.6);
+  pointer-events: none;
+  z-index: 0;
+}
+#screen-result .topbar,
+#screen-result .scroll-body {
+  position: relative;
+  z-index: 1;
+}
+
+.result-inner {
+  width: 100%; max-width: 480px;
+  margin: 0 auto;
+  padding: 8px 20px 100px;
+  display: flex; flex-direction: column; gap: 16px;
+}
+
+/* 动画块 */
+.result-block {
+  opacity: 0; transform: translateY(24px);
+  transition: opacity 0.55s ease-out, transform 0.55s ease-out;
+}
+.result-block.show { opacity: 1; transform: translateY(0); }
+
+/* ── 顶部 Header：命格代码横排 ── */
+.res-header {
+  text-align: center; padding: 20px 12px 12px;
+}
+.res-header-label {
+  font-size: 11px; color: rgba(255,255,255,0.35);
+  letter-spacing: 4px; margin-bottom: 10px;
+  text-transform: uppercase;
+}
+.res-code-row {
+  display: flex; align-items: center; justify-content: center;
+  gap: 10px; flex-wrap: wrap;
+  font-size: 20px; font-weight: 700; color: #fff;
+  letter-spacing: 2px;
+  position: relative; z-index: 1;
+}
+.res-code-row.glow {
+  text-shadow: 0 0 14px rgba(255,255,255,0.7), 0 0 28px rgba(255,255,255,0.35);
+}
+.res-code-sep {
+  color: rgba(255,255,255,0.2); font-weight: 300;
+}
+.res-header-sub {
+  font-size: 10px; color: rgba(255,255,255,0.2);
+  letter-spacing: 3px; margin-top: 10px;
+  text-transform: uppercase;
+}
+
+/* ── 角色立绘区 ── */
+.res-portrait-wrap {
+  position: relative; width: 100%; min-height: 280px;
+  display: flex; align-items: center; justify-content: center;
+  overflow: visible; gap: 28px; padding: 20px 24px;
+}
+.res-portrait-glow {
+  position: absolute;
+  width: 220px; height: 220px;
+  background: radial-gradient(ellipse, rgba(160,170,200,0.25) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: portraitGlow 4s ease-in-out infinite;
+  left: 60px; top: 50%; transform: translateY(-50%);
+}
+@keyframes portraitGlow {
+  0%,100% { opacity: 0.6; transform: translateY(-50%) scale(0.9); }
+  50%     { opacity: 1;   transform: translateY(-50%) scale(1.05); }
+}
+.res-portrait-img-wrap {
+  position: relative; z-index: 2;
+  width: 180px; height: 240px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.res-portrait-img-wrap img {
+  max-height: 100%; max-width: 100%; object-fit: contain;
+  filter: drop-shadow(0 8px 32px rgba(0,0,0,0.8));
+}
+.res-portrait-info {
+  position: relative; z-index: 3;
+  display: flex; flex-direction: column; align-items: flex-start;
+}
+.res-char-name {
+  font-size: 28px; font-weight: 800; color: #fff;
+  letter-spacing: 3px; line-height: 1.2; margin-bottom: 4px;
+}
+.res-char-source {
+  font-size: 13px; color: rgba(200,210,230,0.9); margin-bottom: 12px;
+}
+.res-char-badge {
+  display: inline-block; padding: 4px 14px;
+  border: 1px solid rgba(200,210,230,0.5);
+  border-radius: 20px; font-size: 12px;
+  color: rgba(200,210,230,0.9);
+  background: rgba(200,210,230,0.08);
+  letter-spacing: 1px;
+}
+
+/* ── 引用语 ── */
+.res-quote {
+  text-align: center; font-size: 13px; color: rgba(200,210,230,0.9);
+  font-style: italic; opacity: 0.88;
+  display: flex; align-items: center; justify-content: center;
+  gap: 8px; padding: 0 12px;
+  line-height: 1.8;
+}
+.res-quote-mark {
+  font-size: 20px; font-style: normal;
+  font-family: Georgia, serif; line-height: 1;
+}
+
+/* ── Glass Card 通用 ── */
+.res-glass-card {
+  background: rgba(25,23,26,0.6);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(200,210,230,0.15);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+/* ── Section 标题 ── */
+.res-section-title {
+  position: relative; padding-left: 12px;
+  color: #e5e5e5; font-weight: 500; font-size: 15px;
+  margin-bottom: 14px;
+}
+.res-section-title::before {
+  content: '';
+  position: absolute; left: 0; top: 2px; bottom: 2px;
+  width: 3px; background: rgba(200,210,230,0.9); border-radius: 2px;
+}
+
+/* ── 标签组 ── */
+.res-tags {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px;
+}
+.res-tag {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 4px;
+  font-size: 12px; color: rgba(255,255,255,0.65);
+  padding: 4px 12px;
+}
+.res-tag-red {
+  border-color: rgba(200,210,230,0.3);
+  color: rgba(200,210,230,0.85);
+  background: rgba(200,210,230,0.06);
+}
+.res-desc {
+  font-size: 13px; color: rgba(255,255,255,0.5); line-height: 2;
+}
+
+/* ── SVG 雷达图 ── */
+.res-radar-wrap {
+  display: flex; flex-direction: column; align-items: center;
+  margin: 8px 0 4px;
+}
+.res-radar-svg-container {
+  width: 220px; height: 220px;
+  position: relative;
+}
+
+/* ── 命格解析 (条形) ── */
+.dim-block {
+  padding: 0;
+}
+.dim-title {
+  font-size: 12px; color: rgba(255,255,255,0.3); letter-spacing: 3px;
+  margin-bottom: 20px; font-weight: 500;
+}
+.dim-row { margin-bottom: 22px; }
+.dim-row:last-child { margin-bottom: 0; }
+.dim-labels {
+  display: flex; justify-content: space-between;
+  margin-bottom: 10px;
+}
+.dim-label-s { font-size: 12px; color: rgba(255,255,255,0.35); }
+.dim-label-c { font-size: 12px; color: rgba(255,255,255,0.5); font-weight: 500; }
+.dim-bar-wrap {
+  width: 100%; height: 6px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 3px; overflow: visible; position: relative;
+}
+.dim-bar-fill {
+  height: 100%; border-radius: 3px;
+  background: linear-gradient(to right, rgba(160,170,200,0.4), rgba(160,170,200,0.9));
+  position: absolute; left: 50%; top: 0;
+  width: 0%;
+  transition: width 1s cubic-bezier(0.22, 1, 0.36, 1) 0.3s;
+  transform-origin: left;
+  box-shadow: 0 0 12px rgba(230,57,70,0.3);
+}
+.dim-bar-neg {
+  height: 100%; border-radius: 3px;
+  background: linear-gradient(to left, rgba(120,180,255,0.4), rgba(120,180,255,0.8));
+  position: absolute; right: 50%; top: 0;
+  width: 0%;
+  transition: width 1s cubic-bezier(0.22, 1, 0.36, 1) 0.3s;
+  transform-origin: right;
+  box-shadow: 0 0 12px rgba(120,180,255,0.2);
+}
+.dim-center-tick {
+  position: absolute; left: 50%; top: -5px;
+  width: 1px; height: 16px; background: rgba(255,255,255,0.12);
+  transform: translateX(-50%);
+}
+.dim-score-label {
+  font-size: 11px; color: rgba(255,255,255,0.2);
+  text-align: right; margin-top: 8px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── 流派推荐 ── */
+.rec-title {
+  font-size: 12px; color: rgba(255,255,255,0.3); letter-spacing: 3px;
+  margin-bottom: 16px; font-weight: 500;
+}
+.rec-genres {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px;
+}
+.rec-genre-tag {
+  padding: 6px 16px; border-radius: 20px;
+  border: 1px solid rgba(230,57,70,0.2);
+  font-size: 13px; color: rgba(230,57,70,0.7);
+  background: rgba(230,57,70,0.04);
+  letter-spacing: 0.5px;
+}
+.rec-text { font-size: 13px; color: rgba(255,255,255,0.4); line-height: 2; }
+
+/* ── 底部固定操作栏 ── */
+.res-action-bar {
+  position: fixed; bottom: 0; left: 0; width: 100%;
+  padding: 14px 16px;
+  background: rgba(25,23,26,0.85);
+  backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(200,210,230,0.1);
+  border-radius: 20px 20px 0 0;
+  display: flex; gap: 12px;
+  z-index: 50;
+  /* 默认隐藏，由 JS 控制 */
+  transform: translateY(100%);
+  transition: transform 0.4s cubic-bezier(0.22,1,0.36,1);
+}
+.res-action-bar.show { transform: translateY(0); }
+.res-btn-dark {
+  flex: 1; padding: 14px 0; border-radius: 12px;
+  background: rgba(30,28,30,0.8);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #fff; font-size: 14px; font-weight: 500;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  cursor: pointer; transition: all 0.25s;
+  -webkit-tap-highlight-color: transparent;
+}
+.res-btn-dark:active { background: rgba(50,48,50,0.9); }
+.res-btn-red {
+  flex: 1; padding: 14px 0; border-radius: 12px;
+  background: linear-gradient(90deg, rgba(160,170,200,0.7) 0%, rgba(200,210,230,0.9) 100%);
+  box-shadow: 0 4px 16px rgba(160,170,200,0.3);
+  border: none; color: #0b0914; font-size: 14px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  cursor: pointer; transition: all 0.25s;
+  -webkit-tap-highlight-color: transparent;
+}
+.res-btn-red:active { transform: translateY(2px); box-shadow: 0 2px 8px rgba(160,170,200,0.5); }
+
+/* 旧版兼容（poster/share overlay 用到） */
+.result-btns {
+  display: flex; flex-direction: column; gap: 12px;
+  align-items: center; padding-top: 8px;
+}
+.btn-result-share {
+  background: linear-gradient(135deg, rgba(160,170,200,0.8) 0%, rgba(200,210,230,0.9) 100%) !important;
+  color: #0b0914 !important;
+  box-shadow: 0 4px 24px rgba(160,170,200,0.25) !important;
+}
+.btn-result-share:active { opacity: 0.85; }
+
+/* ========== SHARE OVERLAY ========== */
+#share-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.9);
+  z-index: 100;
+  display: none; align-items: center; justify-content: center;
+  flex-direction: column;
+}
+#share-overlay.show { display: flex; }
+.poster-container {
+  max-width: 320px; width: 90%;
+  border-radius: 16px; overflow: hidden;
+}
+#poster-canvas-wrapper {
+  width: 100%; border-radius: 16px; overflow: hidden;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.8);
+}
+#poster-canvas-wrapper img { width: 100%; display: block; }
+.share-hint { color: #555; font-size: 13px; margin-top: 16px; }
+.share-btns { display: flex; gap: 12px; margin-top: 16px; }
+
+/* ========== HIDDEN POSTER DOM ========== */
+#poster-dom {
+  position: fixed; left: -9999px; top: 0;
+  width: 375px; background: #0a0a0a;
+  padding: 36px 28px 32px;
+  font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
+.poster-glow {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 300px 300px at 50% 40%, rgba(255,255,255,0.05) 0%, transparent 70%);
+  pointer-events: none;
+}
+.poster-header { text-align: center; margin-bottom: 20px; }
+.poster-product-name { font-size: 12px; color: #444; letter-spacing: 4px; }
+.poster-divider { width: 40px; height: 1px; background: rgba(255,255,255,0.1); margin: 8px auto; }
+.poster-code { text-align: center; margin-bottom: 20px; }
+.poster-code-value { font-size: 18px; font-weight: 700; color: #fff; letter-spacing: 1px; word-break: break-all; }
+.poster-code-label { font-size: 11px; color: #444; margin-top: 6px; letter-spacing: 2px; }
+.poster-char-wrap {
+  display: flex; align-items: center; gap: 16px; margin-bottom: 16px;
+}
+.poster-char-img {
+  width: 80px; height: 110px; object-fit: contain; flex-shrink: 0;
+  border-radius: 6px;
+}
+.poster-char-text {
+  display: flex; flex-direction: column; align-items: flex-start;
+}
+.poster-char-name { font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 2px; }
+.poster-char-source { font-size: 12px; color: #444; margin-bottom: 8px; }
+.poster-char-badge {
+  display: inline-block; padding: 2px 10px;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px; font-size: 11px; color: #555;
+  margin-bottom: 10px;
+}
+.poster-char-desc {
+  font-size: 13px; color: #555; line-height: 1.7;
+  display: -webkit-box; -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical; overflow: hidden;
+  margin-bottom: 16px;
+}
+.poster-dims { margin-bottom: 14px; }
+.poster-dim-row { margin-bottom: 8px; }
+.poster-dim-labels { display: flex; justify-content: space-between; font-size: 11px; color: #444; margin-bottom: 4px; }
+.poster-dim-track { height: 3px; background: rgba(255,255,255,0.07); border-radius: 2px; overflow: hidden; position: relative; }
+.poster-dim-fill { height: 100%; position: absolute; background: rgba(255,255,255,0.4); border-radius: 2px; }
+.poster-genres { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.poster-genre-pill { padding: 3px 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); font-size: 11px; color: #444; }
+.poster-footer { text-align: center; }
+.poster-cta { font-size: 11px; color: #333; letter-spacing: 1px; }
+
+/* ========== MOBILE RESPONSIVE ========== */
+@media (max-width: 480px) {
+  .start-chars {
+    height: 280px;
+    gap: 4px;
+  }
+  .char-figure {
+    width: 100px; height: 170px;
+    border-radius: 10px;
+    transform: scale(0.85);
+  }
+  .char-figure img {
+    width: 120px; height: 215px;
+  }
+  .char-figure.mid {
+    width: 100px; height: 170px;
+  }
+  .char-figure.mid img {
+    width: 130px; height: 220px;
+    margin-top: 30px;
+  }
+  .start-title-img {
+    width: 220px;
+  }
+  .start-desc {
+    font-size: 12px;
+    margin-bottom: 28px;
+  }
+  .start-hero {
+    padding: 16px 16px 32px;
+  }
+  .start-dots {
+    margin-bottom: 20px;
+  }
+  .section-title {
+    font-size: 18px;
+  }
+  .gender-grid {
+    gap: 10px;
+    max-width: 300px;
+  }
+  .gender-card {
+    padding: 20px 8px 18px;
+  }
+  .genre-grid {
+    gap: 8px;
+    max-width: 300px;
+  }
+  .genre-card {
+    padding: 16px 8px 14px;
+    font-size: 13px;
+  }
+  .question-text {
+    font-size: 15px;
+  }
+  .option-card {
+    padding: 16px;
+    font-size: 14px;
+  }
+  .page-content {
+    padding: 24px 16px 40px;
+  }
+  .nav-btns {
+    gap: 12px;
+  }
+  .nav-btn {
+    padding: 10px 24px;
+    font-size: 13px;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- 背景光晕 -->
+<div class="glow-layer glow-1"></div>
+<div class="glow-layer glow-2"></div>
+
+<!-- ===== SCREEN 0: 开始页 ===== -->
+<div class="screen active" id="screen-start">
+  <div class="scroll-body">
+    <div class="start-hero">
+      <div class="start-chars">
+        <div class="char-figure" id="char-left">
+          <img src="char-left.png" alt="克莱恩">
+        </div>
+        <div class="char-figure mid" id="char-mid">
+          <img src="char-mid.png" alt="杨间">
+        </div>
+        <div class="char-figure" id="char-right">
+          <img src="char-right.png" alt="李火旺">
+        </div>
+      </div>
+      <img class="start-title-img" src="title.png" alt="网文角色测试">
+      <div class="start-desc">12道题 · 四维坐标 · 60位经典角色<br>找到你的网文命格</div>
+      <div class="start-dots">
+        <div class="dot active"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+      <button class="btn-primary" onclick="showScreen('screen-gender')">开始推演</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SCREEN 1: 频道/性别选择 ===== -->
+<div class="screen" id="screen-gender">
+  <div class="topbar">
+    <button class="topbar-btn" onclick="showScreen('screen-start')">←</button>
+    <div class="topbar-title">选择角色分类</div>
+    <div class="topbar-spacer"></div>
+  </div>
+  <div class="scroll-body">
+    <div class="gender-page-wrap">
+      <!-- 背景装饰 -->
+      <div class="gender-bg-deco">
+        <div class="gender-bg-tri"></div>
+        <div class="gender-bg-tri2"></div>
+        <div class="gender-bg-tri3"></div>
+        <div class="silver-line-tr"></div>
+        <div class="silver-line-tr2"></div>
+        <div class="silver-line-bl"></div>
+        <div class="silver-line-bl2"></div>
+        <div class="silver-line-top"></div>
+        <div class="silver-line-bot"></div>
+      </div>
+
+      <!-- 顶部标签 -->
+      <div class="gender-top-label">选择角色分类</div>
+
+      <!-- 大标题 -->
+      <div class="gender-big-title">你属于哪个<span class="hl">频道</span>？</div>
+
+      <!-- 副标题 + 菱形装饰 -->
+      <div class="gender-diamond-row">
+        <span style="font-size:11px;color:rgba(255,255,255,0.25);letter-spacing:2px;">不同分类对应不同角色库</span>
+      </div>
+      <div style="display:flex;justify-content:center;margin-bottom:28px;position:relative;z-index:1;">
+        <div class="gender-diamond"></div>
+      </div>
+
+      <!-- HUD 卡片 -->
+      <div class="gender-grid">
+
+        <!-- 男频 -->
+        <div class="gender-card" onclick="selectGender('male')" id="card-male">
+          <span class="hud-corner tl"></span>
+          <span class="hud-corner tr"></span>
+          <span class="hud-corner bl"></span>
+          <span class="hud-corner br"></span>
+          <div class="gender-icon-wrap">
+            <div class="gender-icon-bg"></div>
+            <!-- 剑 SVG -->
+            <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="50" cy="50" r="40" stroke="rgba(160,160,190,0.25)" stroke-width="1.5" stroke-dasharray="6 4"/>
+              <circle cx="50" cy="50" r="28" stroke="rgba(160,160,190,0.15)" stroke-width="1"/>
+              <!-- 剑身 -->
+              <path d="M50 18 L56 44 L50 50 L44 44 Z" fill="rgba(200,210,230,0.9)" stroke="rgba(255,255,255,0.4)" stroke-width="0.8"/>
+              <path d="M50 50 L53 72 L50 78 L47 72 Z" fill="rgba(160,170,190,0.7)" stroke="rgba(200,220,255,0.3)" stroke-width="0.6"/>
+              <!-- 护手 -->
+              <path d="M34 50 L44 46 L50 50 L44 54 Z" fill="rgba(180,190,210,0.85)" stroke="rgba(255,255,255,0.3)" stroke-width="0.8"/>
+              <path d="M66 50 L56 54 L50 50 L56 46 Z" fill="rgba(180,190,210,0.85)" stroke="rgba(255,255,255,0.3)" stroke-width="0.8"/>
+              <!-- 剑刃高光 -->
+              <line x1="50" y1="20" x2="49" y2="44" stroke="rgba(255,255,255,0.5)" stroke-width="0.8"/>
+              <!-- 蓝色宝石 -->
+              <polygon points="50,46 53,50 50,54 47,50" fill="rgba(80,140,255,0.9)" stroke="rgba(140,200,255,0.6)" stroke-width="0.8"/>
+            </svg>
+          </div>
+          <div class="gender-name">
+            <span class="gender-name-arrow"></span>男频
+          </div>
+          <div class="gender-hint">斗破苍穹<br>诡秘之主</div>
+          <div class="gender-card-bar"></div>
+        </div>
+
+        <!-- 女频（中间，默认突出） -->
+        <div class="gender-card mid-default" onclick="selectGender('female')" id="card-female">
+          <span class="hud-corner tl"></span>
+          <span class="hud-corner tr"></span>
+          <span class="hud-corner bl"></span>
+          <span class="hud-corner br"></span>
+          <div class="gender-icon-wrap">
+            <div class="gender-icon-bg"></div>
+            <!-- 莲花 SVG -->
+            <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- 外圈装饰 -->
+              <circle cx="50" cy="50" r="42" stroke="rgba(160,140,200,0.2)" stroke-width="1" stroke-dasharray="4 6"/>
+              <!-- 花瓣 -->
+              <path d="M50 22 C54 30 56 38 50 45 C44 38 46 30 50 22Z" fill="rgba(200,190,220,0.85)" stroke="rgba(220,210,240,0.5)" stroke-width="0.8"/>
+              <path d="M50 78 C54 70 56 62 50 55 C44 62 46 70 50 78Z" fill="rgba(200,190,220,0.85)" stroke="rgba(220,210,240,0.5)" stroke-width="0.8"/>
+              <path d="M22 50 C30 46 38 44 45 50 C38 56 30 54 22 50Z" fill="rgba(200,190,220,0.85)" stroke="rgba(220,210,240,0.5)" stroke-width="0.8"/>
+              <path d="M78 50 C70 46 62 44 55 50 C62 56 70 54 78 50Z" fill="rgba(200,190,220,0.85)" stroke="rgba(220,210,240,0.5)" stroke-width="0.8"/>
+              <!-- 斜向花瓣 -->
+              <path d="M28 28 C34 36 38 42 45 45 C38 38 32 32 28 28Z" fill="rgba(180,170,210,0.7)" stroke="rgba(200,190,230,0.4)" stroke-width="0.8"/>
+              <path d="M72 28 C66 36 62 42 55 45 C62 38 68 32 72 28Z" fill="rgba(180,170,210,0.7)" stroke="rgba(200,190,230,0.4)" stroke-width="0.8"/>
+              <path d="M28 72 C34 64 38 58 45 55 C38 62 32 68 28 72Z" fill="rgba(180,170,210,0.7)" stroke="rgba(200,190,230,0.4)" stroke-width="0.8"/>
+              <path d="M72 72 C66 64 62 58 55 55 C62 62 68 68 72 72Z" fill="rgba(180,170,210,0.7)" stroke="rgba(200,190,230,0.4)" stroke-width="0.8"/>
+              <!-- 花心 -->
+              <circle cx="50" cy="50" r="8" fill="rgba(140,100,200,0.7)" stroke="rgba(180,140,240,0.6)" stroke-width="1"/>
+              <circle cx="50" cy="50" r="4" fill="rgba(200,160,255,0.9)"/>
+              <!-- 紫色光晕 -->
+              <circle cx="50" cy="50" r="12" fill="rgba(140,80,200,0.08)"/>
+            </svg>
+          </div>
+          <div class="gender-name">
+            <span class="gender-name-arrow"></span>女频
+          </div>
+          <div class="gender-hint">知否知否<br>甄嬛传</div>
+          <div class="gender-card-bar"></div>
+        </div>
+
+        <!-- 杂食 -->
+        <div class="gender-card" onclick="selectGender('misc')" id="card-misc">
+          <span class="hud-corner tl"></span>
+          <span class="hud-corner tr"></span>
+          <span class="hud-corner bl"></span>
+          <span class="hud-corner br"></span>
+          <div class="gender-icon-wrap">
+            <div class="gender-icon-bg"></div>
+            <!-- 三角徽标 SVG（类似魔纹/传送门符文） -->
+            <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- 外圆 -->
+              <circle cx="50" cy="50" r="42" stroke="rgba(60,160,160,0.25)" stroke-width="1.5" stroke-dasharray="5 5"/>
+              <!-- 轨道环 -->
+              <ellipse cx="50" cy="50" rx="38" ry="38" stroke="rgba(60,160,160,0.15)" stroke-width="1" stroke-dasharray="3 8"/>
+              <!-- 主三角 -->
+              <polygon points="50,20 74,64 26,64" stroke="rgba(120,210,200,0.8)" stroke-width="2" fill="rgba(60,140,140,0.12)"/>
+              <!-- 内三角（倒置） -->
+              <polygon points="50,70 33,42 67,42" stroke="rgba(80,200,200,0.5)" stroke-width="1.2" fill="rgba(40,120,120,0.08)"/>
+              <!-- 宝石 -->
+              <polygon points="50,34 56,44 50,50 44,44" fill="rgba(80,220,200,0.9)" stroke="rgba(160,255,240,0.6)" stroke-width="0.8"/>
+              <!-- 顶点光 -->
+              <circle cx="50" cy="20" r="3" fill="rgba(120,240,220,0.9)"/>
+              <circle cx="74" cy="64" r="3" fill="rgba(60,180,180,0.7)"/>
+              <circle cx="26" cy="64" r="3" fill="rgba(60,180,180,0.7)"/>
+            </svg>
+          </div>
+          <div class="gender-name">
+            <span class="gender-name-arrow"></span>杂食
+          </div>
+          <div class="gender-hint">天官赐福<br>魔道祖师</div>
+          <div class="gender-card-bar"></div>
+        </div>
+
+      </div><!-- .gender-grid -->
+
+      <!-- 下一步按钮 -->
+      <div class="btn-gender-next-wrap">
+        <button class="btn-primary" id="btn-gender-next" disabled onclick="goToGenre()">
+          下一步<span class="btn-next-chevron">&nbsp;»</span>
+        </button>
+      </div>
+
+    </div><!-- .gender-page-wrap -->
+  </div>
+</div>
+
+<!-- ===== SCREEN 2: 流派选择 ===== -->
+<div class="screen" id="screen-genre">
+  <div class="topbar">
+    <button class="topbar-btn" onclick="showScreen('screen-gender')">←</button>
+    <div class="topbar-title">选择喜欢的流派</div>
+    <div class="topbar-spacer"></div>
+  </div>
+  <div class="scroll-body">
+    <div class="genre-page-wrap">
+
+      <!-- 背景银色暗纹装饰 -->
+      <div class="genre-bg-deco">
+        <div class="silver-line-tr"></div>
+        <div class="silver-line-tr2"></div>
+        <div class="silver-line-bl"></div>
+        <div class="silver-line-bl2"></div>
+        <div class="silver-line-top"></div>
+        <div class="silver-line-bot"></div>
+        <div class="genre-bg-tri"></div>
+        <div class="genre-bg-tri2"></div>
+        <div class="genre-bg-tri3"></div>
+        <div class="genre-bg-tri4"></div>
+      </div>
+
+      <!-- 标题区 -->
+      <div class="genre-header">
+        <div class="genre-header-rule">
+          <div class="genre-header-line"></div>
+          <div class="genre-header-dot"></div>
+          <div class="genre-header-dot"></div>
+          <div class="genre-header-dot"></div>
+          <div class="genre-header-line"></div>
+        </div>
+        <div class="genre-title">选择喜欢的流派</div>
+        <div class="genre-tip">请选择 <span id="genre-count-text">3</span> 个流派（已选 <span id="genre-selected-count">0</span>/3）</div>
+      </div>
+
+      <!-- 标签网格（由 JS 渲染） -->
+      <div class="genre-grid" id="genre-grid"></div>
+
+      <!-- 按钮 -->
+      <div class="genre-btn-wrap">
+        <button class="genre-btn-start" id="btn-genre-next" disabled onclick="startQuiz()">
+          <div class="genre-btn-inner-glow"></div>
+          <span class="genre-btn-slash">////</span>
+          开始推演
+          <span class="genre-btn-slash">////</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ===== SCREEN 3: 答题页 ===== -->
+<div class="screen" id="screen-quiz">
+  <div class="quiz-bg-lines"></div>
+  <div class="fixed top-1/4 left-10 w-32 h-32 bg-slate-500 rounded-full mix-blend-screen filter blur-[80px] opacity-20 z-0"></div>
+  <div class="fixed bottom-1/4 right-10 w-40 h-40 bg-gray-500 rounded-full mix-blend-screen filter blur-[100px] opacity-15 z-0"></div>
+  <div class="scroll-body">
+    <div class="quiz-inner">
+      <!-- Header Section -->
+      <header class="quiz-header">
+        <!-- Title -->
+        <div class="quiz-title-row">
+          <div class="quiz-title-line"></div>
+          <div class="quiz-title-diamond"></div>
+          <div class="quiz-title-text">答题中</div>
+          <div class="quiz-title-diamond"></div>
+          <div class="quiz-title-line left"></div>
+        </div>
+        <!-- Progress Info -->
+        <div class="quiz-meta">
+          <div class="quiz-meta-row">
+            <div class="quiz-dim" id="quiz-dim-name"></div>
+            <div class="quiz-progress-num" id="quiz-progress-num"></div>
+          </div>
+          <div class="quiz-progress-wrap">
+            <div class="progress-bar">
+              <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+            </div>
+            <div class="progress-dot start"></div>
+            <div class="progress-dot end"></div>
+          </div>
+        </div>
+      </header>
+      <!-- Question Section -->
+      <section class="quiz-question-section">
+        <span class="quiz-quote">«</span>
+        <h2 class="quiz-question" id="quiz-question"></h2>
+        <span class="quiz-quote">»</span>
+      </section>
+      <!-- Options List -->
+      <div class="quiz-options" id="quiz-options"></div>
+      <!-- Navigation Controls -->
+      <nav class="quiz-nav">
+        <button class="quiz-nav-btn" id="btn-prev-q" onclick="prevQuestion()" disabled>
+          <span class="nav-btn-quote">«</span>
+          <span>上一题</span>
+          <span class="nav-btn-quote">»</span>
+        </button>
+        <button class="quiz-nav-btn primary" id="btn-next-q" onclick="nextQuestion()" disabled>
+          <span class="nav-btn-quote">«</span>
+          <span>下一题</span>
+          <span class="nav-btn-quote">»</span>
+        </button>
+      </nav>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SCREEN 4: 加载页 ===== -->
+<div class="screen" id="screen-loading">
+  <div class="scroll-body">
+    <div class="loading-ring"></div>
+    <div class="loading-text">正在推演你的命格</div>
+    <div class="loading-dots">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SCREEN 5: 结果页 ===== -->
+<div class="screen" id="screen-result">
+  <div class="topbar">
+    <div class="topbar-spacer"></div>
+    <div class="topbar-title">你的网文命格</div>
+    <div class="topbar-spacer"></div>
+  </div>
+  <div class="scroll-body">
+    <div class="result-inner" id="result-inner">
+      <!-- 动态渲染 -->
+    </div>
+  </div>
+</div>
+
+<!-- ===== 结果页底部操作栏（固定浮层）===== -->
+<div class="res-action-bar" id="res-action-bar">
+  <button class="res-btn-dark" onclick="retest()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+    </svg>
+    重新测试
+  </button>
+  <button class="res-btn-red" onclick="openShare()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+    </svg>
+    分享结果
+  </button>
+</div>
+
+<!-- ===== 分享浮层 ===== -->
+<div id="share-overlay">
+  <div class="poster-container">
+    <div id="poster-canvas-wrapper"></div>
+  </div>
+  <div class="share-hint">长按图片保存到相册</div>
+  <div class="share-btns">
+    <button class="btn-secondary" onclick="closeShare()" style="padding:10px 28px;font-size:14px">关闭</button>
+  </div>
+</div>
+
+<!-- ===== 隐藏海报 DOM ===== -->
+<div id="poster-dom">
+  <div class="poster-glow"></div>
+  <div class="poster-header">
+    <div class="poster-product-name">CPTI · 网文人格推演</div>
+    <div class="poster-divider"></div>
+  </div>
+  <div class="poster-code">
+    <div class="poster-code-value" id="p-code"></div>
+    <div class="poster-code-label">我的网文命格</div>
+  </div>
+  <div class="poster-char-wrap" id="p-char-wrap">
+    <img class="poster-char-img" id="p-char-img" src="" alt="" onerror="this.style.display='none'; document.getElementById('p-char-placeholder').style.display='flex';">
+    <div id="p-char-placeholder" style="display:none; width:180px;height:240px; background:linear-gradient(135deg,rgba(160,170,200,0.3),rgba(160,170,200,0.1)); border-radius:12px; align-items:center; justify-content:center; flex-direction:column; color:rgba(200,210,230,0.7); font-size:14px;">
+      <div style="font-size:48px; margin-bottom:8px;">🎭</div>
+      <div id="p-placeholder-name"></div>
+    </div>
+    <div class="poster-char-text">
+      <div class="poster-char-name" id="p-name"></div>
+      <div class="poster-char-source" id="p-source"></div>
+      <div class="poster-char-badge" id="p-badge"></div>
+    </div>
+  </div>
+  <div class="poster-char-desc" id="p-desc"></div>
+  <div class="poster-dims" id="p-dims"></div>
+  <div class="poster-genres" id="p-genres"></div>
+  <div class="poster-footer">
+    <div class="poster-cta">来测测你的网文命格</div>
+  </div>
+</div>
+
+<script>
+// ==================== DATA ====================
+
+const GENRES = {
+  male:   ["玄幻","仙侠","都市","无限流","科幻","历史","悬疑","轻小说","言情","恐怖"],
+  female: ["古言","仙侠","都市","无限流","穿越","历史","悬疑","甜宠","言情","宫斗"],
+  misc:   ["纯爱/BL","GL/百合","无限流","电竞","校园","娱乐圈","快穿","穿书","ABO","悬疑推理"]
+};
+
+const QUESTIONS = {
+  male: [
+    { dim:"LZ", dimName:"行事风格", text:"被人当众针对、陷害，你的第一反应是？",
+      opts:[{text:"直接正面对抗，让对方知道惹错人了",score:3},{text:"先稳住场面，回头再算账",score:1},{text:"分析对方动机和弱点，从根源反杀",score:-1},{text:"表面不动声色，暗中布一个让对方再也无法翻身的局",score:-3}]},
+    { dim:"LZ", dimName:"行事风格", text:"你最喜欢哪种角色的魅力时刻？",
+      opts:[{text:"三十年河东三十年河西，曾经看不起我的人现在跪在我面前",score:3},{text:"关键时刻爆发，以一敌百力挽狂澜",score:1},{text:"三言两语化解危机，所有人意识到低估了他的实力",score:-1},{text:"揭示真相——所有人意识到从一开始就在他的算计里",score:-3}]},
+    { dim:"LZ", dimName:"行事风格", text:"面对一个看似无解的死局，你会？",
+      opts:[{text:"硬闯，谁说我不行我就证明给谁看",score:3},{text:"先稳住局势，边走边找突破口",score:1},{text:"收集所有信息，找出唯一的破局之法",score:-1},{text:"这个死局本就是别人设的——那就反过来利用它",score:-3}]},
+    { dim:"FR", dimName:"设定类型", text:"穿越到故事里，你最希望自己的设定是？",
+      opts:[{text:"天生帝王/神明/魔族血脉，一出场就碾压众生",score:3},{text:"有特殊身份但平时隐藏，关键时刻亮出底牌",score:1},{text:"普通人出身，但机缘不断，成长速度惊人",score:-1},{text:"纯普通人，没有任何特殊设定，全靠自己拼",score:-3}]},
+    { dim:"FR", dimName:"设定类型", text:"你更吃哪种「扮猪吃虎」的展开？",
+      opts:[{text:"众叛亲离后王者归来，所有人都惊掉下巴",score:3},{text:"身份隐藏极深，只有在关键时刻才展露锋芒",score:1},{text:"明明很强但被迫低调，被误解时也不解释",score:-1},{text:"用计谋以弱胜强，智商碾压全场",score:-3}]},
+    { dim:"FR", dimName:"设定类型", text:"你觉得主角和其他人的「差距」最好是？",
+      opts:[{text:"主角远超所有人，独孤求败",score:3},{text:"主角略强，但弱势方有隐藏潜力",score:1},{text:"势均力敌，你追我赶",score:-1},{text:"都是普通人，靠智谋和勇气取胜",score:-3}]},
+    { dim:"SE", dimName:"道德底线", text:"有人伤害了你在乎的人，你会？",
+      opts:[{text:"加倍奉还，让他知道后果有多严重",score:3},{text:"让他付出代价，一分不少",score:1},{text:"护好自己在乎的人，但不强出头报复",score:-1},{text:"找对方理论，用正当方式解决",score:-3}]},
+    { dim:"SE", dimName:"道德底线", text:"你怎么看「为了保护一个人而伤害其他人」？",
+      opts:[{text:"其他人跟我有什么关系，我的人我护",score:3},{text:"可以理解，但尽量找两全的办法",score:1},{text:"如果没有别的路，选伤害最小的方案",score:-1},{text:"绝对不行，别人的痛苦不该被当作代价",score:-3}]},
+    { dim:"SE", dimName:"道德底线", text:"对于「恩将仇报」的人，你的态度是？",
+      opts:[{text:"绝不原谅，这种人不值得任何同情",score:3},{text:"看情况，情有可原的话可以理解",score:1},{text:"心寒，但不会主动报复",score:-1},{text:"能帮就帮，不计前嫌",score:-3}]},
+    { dim:"YQ", dimName:"情感驱动", text:"感情和事业（变强）冲突时，你更倾向？",
+      opts:[{text:"事业为先，感情只是变强路上的调剂",score:3},{text:"两边都想顾，但必须取舍时选事业",score:1},{text:"尽量平衡，感情和实力我都要",score:-1},{text:"真爱不会阻碍事业，真正爱你的人会陪你一起变强",score:-3}]},
+    { dim:"YQ", dimName:"情感驱动", text:"你觉得男人之间最戳人的羁绊是？",
+      opts:[{text:"过命的兄弟情，一起从弱小走向强大",score:3},{text:"亦敌亦友的惺惺相惜",score:1},{text:"师徒情谊，传承与超越",score:-1},{text:"从对手到挚友的过程",score:-3}]},
+    { dim:"YQ", dimName:"情感驱动", text:"你觉得最好的感情结局是？",
+      opts:[{text:"站在世界之巅，并肩俯瞰一切",score:3},{text:"功成名就之后，给她一个家",score:1},{text:"不强求结果，各自精彩也很好",score:-1},{text:"不管外面什么样，我只想和她在一起",score:-3}]}
+  ],
+  female: [
+    { dim:"LZ", dimName:"行事风格", text:"被人当众针对、陷害，你的第一反应是？",
+      opts:[{text:"正面硬刚，你以为我好欺负吗？",score:3},{text:"先稳住，暗中收集证据再反击",score:1},{text:"找信任的人商量，一起想办法",score:-1},{text:"默默忍下，用实力证明她们都是小人",score:-3}]},
+    { dim:"LZ", dimName:"行事风格", text:"你最喜欢哪种女性角色的魅力时刻？",
+      opts:[{text:"气场全开，曾经欺负她的人全部后悔",score:3},{text:"关键时刻温柔出手，让人怦然心动",score:1},{text:"高情商化解尴尬，暗中护住在意的人",score:-1},{text:"逆袭打脸，完成华丽转身",score:-3}]},
+    { dim:"LZ", dimName:"行事风格", text:"面对一段暧昧中的「拉扯期」，你会？",
+      opts:[{text:"主动出击，直接挑明",score:3},{text:"试探着推进，看对方反应",score:1},{text:"等他先开口，享受被追的感觉",score:-1},{text:"欲擒故纵，欲拒还迎",score:-3}]},
+    { dim:"FR", dimName:"设定类型", text:"穿越到故事里，你希望自己的设定是？",
+      opts:[{text:"绝美外表+隐藏身份，王爷/总裁不自觉被吸引",score:3},{text:"有特殊技能或家世，但前期隐藏实力",score:1},{text:"聪明普通人，凭情商和头脑逆袭",score:-1},{text:"真实身份惊人，不是普通人",score:-3}]},
+    { dim:"FR", dimName:"设定类型", text:"你更吃哪种「成长蜕变」的设定？",
+      opts:[{text:"灰姑娘→女王，从被轻视到令人仰望",score:3},{text:"傻白甜→大女主，内心和能力同步成长",score:1},{text:"隐藏大佬，身份揭露后令人震惊",score:-1},{text:"一直很优秀，只是没人知道",score:-3}]},
+    { dim:"FR", dimName:"设定类型", text:"你更吃哪种感情里的「设定」？",
+      opts:[{text:"他很强大，但只对我一个人温柔",score:3},{text:"欢喜冤家，从互相嫌弃到离不开彼此",score:1},{text:"青梅竹马，兜兜转转还是你",score:-1},{text:"势均力敌，两个强者互相成就",score:-3}]},
+    { dim:"SE", dimName:"道德底线", text:"你爱的人为保护你伤害了别人，你会？",
+      opts:[{text:"理解他，因为他是为了我",score:3},{text:"心疼他，但希望他用别的方式",score:1},{text:"劝他自首，我会等他",score:-1},{text:"绝不接受这种行为，不管为了谁",score:-3}]},
+    { dim:"SE", dimName:"道德底线", text:"你发现闺蜜也喜欢你的男朋友，你会？",
+      opts:[{text:"直接宣示主权，他是我的",score:3},{text:"暗中观察，看男朋友的态度",score:1},{text:"主动找闺蜜谈，试图挽回友情",score:-1},{text:"选择退出，把机会让给闺蜜",score:-3}]},
+    { dim:"SE", dimName:"道德底线", text:"面对抢了你风头的同事，你的态度是？",
+      opts:[{text:"暗中努力，用实力超过她",score:3},{text:"正面竞争，公公平平地比一场",score:1},{text:"想办法让她出丑",score:-1},{text:"和她做朋友，合作共赢",score:-3}]},
+    { dim:"YQ", dimName:"情感驱动", text:"一段感情里，最吸引你的是？",
+      opts:[{text:"他看向所有人时都冷冷的，只有看我时才温柔",score:3},{text:"他很强，但愿意为我放下骄傲",score:1},{text:"他懂我，一个眼神就能懂彼此",score:-1},{text:"细水长流的陪伴，日久见真情",score:-3}]},
+    { dim:"YQ", dimName:"情感驱动", text:"你最在乎的CP感是哪种？",
+      opts:[{text:"偏执占有型——你是我的，谁都不能抢",score:3},{text:"温柔守护型——你在闹，他在笑",score:1},{text:"势均力敌型——我们都很强，在一起更强",score:-1},{text:"相互救赎型——我们都是彼此的光",score:-3}]},
+    { dim:"YQ", dimName:"情感驱动", text:"你在乎的人选择了离开，你会？",
+      opts:[{text:"不管他去哪，我都会找到他",score:3},{text:"嘴上说放手，心里一直放不下",score:1},{text:"变得更优秀，让他后悔",score:-1},{text:"放手，各自安好，感情不是全部",score:-3}]}
+  ],
+  misc: [
+    { dim:"LZ", dimName:"行事风格", text:"你相信「命中注定」吗？",
+      opts:[{text:"相信，有些人天生就是为了遇见彼此",score:3},{text:"相信缘份，但也要靠彼此珍惜",score:1},{text:"半信半疑，感情还是要靠自己经营",score:-1},{text:"不相信，命运掌握在自己手里",score:-3}]},
+    { dim:"LZ", dimName:"行事风格", text:"你最喜欢的「强强对决」场面是？",
+      opts:[{text:"两个势均力敌的人，互相试探又彼此吸引",score:3},{text:"他们都是各自领域的顶尖，唯独在彼此面前破功",score:1},{text:"对峙时电光火石，眼神交汇时却全是情意",score:-1},{text:"从对手到并肩作战的战友",score:-3}]},
+    { dim:"LZ", dimName:"行事风格", text:"如果你爱的人要设局困住你，你是？",
+      opts:[{text:"心甘情愿地走进去",score:3},{text:"知道真相后选择原谅他",score:1},{text:"挣扎但最终接受",score:-1},{text:"绝对不入局，宁可离开",score:-3}]},
+    { dim:"FR", dimName:"设定类型", text:"哪种设定最戳你的心？",
+      opts:[{text:"身世复杂，背负着不能说的秘密接近对方",score:3},{text:"两个本该是敌人的人，在相处中被彼此吸引",score:1},{text:"他们有过节，但在一次次交锋中产生羁绊",score:-1},{text:"竹马竹马，从小一起长大却后来才意识到感情",score:-3}]},
+    { dim:"FR", dimName:"设定类型", text:"你更吃哪种「救赎」的设定？",
+      opts:[{text:"他是所有人的光，唯独照不进自己的黑暗",score:3},{text:"他是深渊里爬出来的，却在遇见对方后想要变好",score:1},{text:"他们互相救赎，彼此成为对方的光",score:-1},{text:"从相杀到相爱，虐到深处自然甜",score:-3}]},
+    { dim:"FR", dimName:"设定类型", text:"你更在意「攻受」还是「角色性格」？",
+      opts:[{text:"更在意攻受定位，有明确偏好",score:3},{text:"攻受都可以，更看重角色性格契合度",score:1},{text:"喜欢互攻，势均力敌更有张力",score:-1},{text:"纯看感觉，不给自己设限",score:-3}]},
+    { dim:"SE", dimName:"道德底线", text:"你能接受「继兄弟」这类禁忌设定吗？",
+      opts:[{text:"完全接受，禁忌感让感情更有张力",score:3},{text:"能接受，但要看作者怎么处理",score:1},{text:"不太能接受，设定太刻意",score:-1},{text:"完全不能接受",score:-3}]},
+    { dim:"SE", dimName:"道德底线", text:"你喜欢「恶役」或灰色地带的角色吗？",
+      opts:[{text:"超喜欢，坏到骨子里的角色反而最有魅力",score:3},{text:"可以接受，看角色有没有深层动机",score:1},{text:"理解角色，但不会喜欢",score:-1},{text:"无法共情，正派才是我的菜",score:-3}]},
+    { dim:"SE", dimName:"道德底线", text:"你对「渣」角色（花心/渣攻/渣受）的态度？",
+      opts:[{text:"只要他最后只爱我一个，渣过也接受",score:3},{text:"可以接受浪子回头",score:1},{text:"渣过的人洗不白，接受不了",score:-1},{text:"完全不能接受渣属性",score:-3}]},
+    { dim:"YQ", dimName:"情感驱动", text:"你更喜欢哪种感情形态？",
+      opts:[{text:"暗恋成真，从小心翼翼到双向奔赴",score:3},{text:"单向奔赴，一个追一个逃最终HE",score:1},{text:"命中注定，从相遇到相守都是必然",score:-1},{text:"慢慢日久生情，平淡却动人",score:-3}]},
+    { dim:"YQ", dimName:"情感驱动", text:"你觉得最虐心的是哪种感情？",
+      opts:[{text:"明明彼此喜欢，却因为各种原因不能在一起",score:3},{text:"他在身边，却不知道他有多爱你",score:1},{text:"错过就是一生，再见已是陌路",score:-1},{text:"误会叠加，明明可以解释却偏偏错过",score:-3}]},
+    { dim:"YQ", dimName:"情感驱动", text:"你更吃哪种感情结局？",
+      opts:[{text:"BE美学，留有遗憾才是永恒的经典",score:3},{text:"HE，但过程虐到极致",score:1},{text:"开放式结局，给想象留白",score:-1},{text:"甜到掉牙，治愈一切不开心",score:-3}]}
+  ]
+};
+
+const CHARS = {
+  male: [
+    {id:1,name:"萧炎",source:"斗破苍穹",title:"炎之帝者",coords:{LZ:8,FR:6,SE:6,YQ:5},tags:["逆袭","修炼","家族","天才陨落"],desc:"你是网文里最经典的逆袭主角。从天才陨落到废柴，从乌坦城到云岚宗，你用三年时间证明了自己。你的字典里没有「放弃」二字，只有「变强」。你相信一切都可以凭借努力改变，哪怕全世界都看不起你，你也能笑到最后。"},
+    {id:2,name:"石昊",source:"完美世界",title:"荒之独尊",coords:{LZ:9,FR:8,SE:-3,YQ:7},tags:["荒天帝","杀伐果断","逆天","守护"],desc:"你是网文里最狂傲的主角。从石村少年到荒天帝，你一路杀伐果断，逆天而行。你或许看起来冷酷无情，但内心深处始终保留着对亲人朋友的守护。"},
+    {id:3,name:"郑吒",source:"无限恐怖",title:"圣母战神",coords:{LZ:7,FR:-6,SE:8,YQ:-7},tags:["团队领袖","成长","无限流","人道主义"],desc:"你是无限流里最可靠的团队领袖。从普通白领到最强者，你经历了无数生死考验。你的领导力和对队友的守护让你成为团队的支柱，人道主义信仰在残酷世界里熠熠发光。"},
+    {id:4,name:"许七安",source:"大奉打更人",title:"镇夜之拳",coords:{LZ:7,FR:-5,SE:6,YQ:2},tags:["打更人","拳法","智谋","守护"],desc:"你是古代悬疑文里最接地气的主角。从普通小吏到镇夜之拳，你用拳头和智慧守护着大奉王朝。你的坚韧和智慧让你在复杂的朝堂斗争中屡屡破局。"},
+    {id:5,name:"唐三",source:"斗罗大陆",title:"魂之守护",coords:{LZ:5,FR:7,SE:7,YQ:-4},tags:["双生武魂","蓝银皇","昊天锤","守护"],desc:"你是玄幻文里最温柔的主角。从唐门弟子到海神，你用双生武魂守护着所爱之人。你相信友情和爱情的力量，在最艰难的时刻也不曾放弃。"},
+    {id:6,name:"林动",source:"武动乾坤",title:"符之战皇",coords:{LZ:6,FR:-4,SE:-5,YQ:8},tags:["符师","武动乾坤","修炼","守护"],desc:"你是玄幻文里最执着的修炼者。从青阳镇到武动乾坤，你用符师的力量守护着家人和爱人。你的毅力让你不断突破极限，为了变强可以放弃一切。"},
+    {id:7,name:"楚轩",source:"无限恐怖",title:"绝对理性",coords:{LZ:-9,FR:7,SE:-7,YQ:9},tags:["智者","理性","无限流","团队"],desc:"你是无限流里最理性的智者。从普通研究员到最强者，你用智慧和逻辑解决一切问题。你的理性让你在团队中成为不可或缺的战略核心。"},
+    {id:8,name:"古月方源",source:"蛊真人",title:"永生魔君",coords:{LZ:-8,FR:5,SE:-9,YQ:8},tags:["蛊真人","魔君","算计","永生"],desc:"你是网文里最极致的魔君。从凡人到魔君，你用算计和狠辣一步步走上巅峰。你内心深处始终保留着对永生的追求，为此不惜付出任何代价。"},
+    {id:9,name:"罗峰",source:"吞噬星空",title:"宇宙之主",coords:{LZ:7,FR:5,SE:2,YQ:8},tags:["吞噬星空","宇宙之主","修炼","守护"],desc:"你是科幻文里最强大的主角。从地球到宇宙，你用吞噬的力量守护着家人和人类。你的毅力和实力让你最终成为宇宙之主。"},
+    {id:10,name:"克莱恩",source:"诡秘之主",title:"灰雾之上",coords:{LZ:-6,FR:5,SE:4,YQ:-5},tags:["诡秘之主","扮演","智谋","守护"],desc:"你是网文里最完美的扮演者。从普通人到诡秘之主，你用无数身份守护着世界。你内心深处始终保留着对归乡的执念和对真相的追求。"},
+    {id:11,name:"叶凡",source:"遮天",title:"荒古天帝",coords:{LZ:4,FR:6,SE:5,YQ:2},tags:["荒古天帝","狠人","修炼","守护"],desc:"你是玄幻文里最神秘的主角。从地球到遮天，你经历了无数生死考验，看起来冷酷无情，但内心深处始终保留着对亲人的守护。"},
+    {id:12,name:"韩立",source:"凡人修仙传",title:"凡之长生",coords:{LZ:2,FR:-7,SE:-5,YQ:-1},tags:["凡人修仙传","长生","谨慎","智谋"],desc:"你是网文里最谨慎的修仙者。从凡人到长生，你用谨慎和智谋在修仙界生存。你相信只有足够谨慎，才能在这弱肉强食的世界中走得更远。"},
+    {id:13,name:"张小凡",source:"诛仙",title:"诛仙之问",coords:{LZ:2,FR:-2,SE:5,YQ:-8},tags:["诛仙","意难平","守护","成长"],desc:"你是网文里最让人意难平的主角。从草庙村到诛仙，你用守护和成长对抗着命运。内心深处始终保留着对所爱之人的守护，那份执念贯穿了整个命运轮回。"},
+    {id:14,name:"路明非",source:"龙族",title:"废柴混血",coords:{LZ:0,FR:3,SE:4,YQ:-9},tags:["龙族","废柴","守护","成长"],desc:"你是网文里最让人心疼的废柴。从废柴到龙族，你用守护和成长对抗着命运。那份羁绊是你最大的软肋也是最强的铠甲。"},
+    {id:15,name:"李火旺",source:"道诡异仙",title:"道诡妄念",coords:{LZ:3,FR:4,SE:1,YQ:-8},tags:["道诡异仙","疯癫","守护","执念"],desc:"你是网文里最疯的主角。从普通人到道诡异仙，你用疯癫和守护对抗着诡异。内心深处始终保留着对现实的执念和对亲人的守护。"},
+    {id:16,name:"陈长生",source:"择天记",title:"逆命书生",coords:{LZ:-3,FR:6,SE:5,YQ:-6},tags:["择天记","书生","逆天","守护"],desc:"你是网文里最儒雅的逆命书生。从书生到逆天者，你用智慧和儒雅守护着世界。内心深处始终保留着对命运的反抗和对所爱之人的守护。"},
+    {id:17,name:"牧尘",source:"大主宰",title:"万古主宰",coords:{LZ:7,FR:9,SE:3,YQ:7},tags:["大主宰","修炼","守护","成长"],desc:"你是网文里最强大的主宰。从少年到万古主宰，你用修炼和守护成为世界之巅。内心深处始终保留着对世界的守护和对所爱之人的温柔。"},
+    {id:18,name:"王林",source:"仙逆",title:"逆仙魔修",coords:{LZ:4,FR:-8,SE:-8,YQ:6},tags:["逆天","魔修","仙逆","守护"],desc:"你是仙侠文里最执着的逆天者。从修魔海到仙界，你用魔修的力量守护着所爱之人。你的毅力和智慧让你在残酷的修仙界中不断突破极限。"},
+    {id:19,name:"宁缺",source:"将夜",title:"将夜长剑",coords:{LZ:7,FR:-3,SE:-6,YQ:-7},tags:["将夜","长剑","守护","成长"],desc:"你是仙侠文里最狠辣的守护者。从渭城到书院，你用长剑和狠辣守护着桑桑。你的心里只有一人，为此可以对抗整个天道。"},
+    {id:20,name:"范闲",source:"庆余年",title:"诗酒仙人",coords:{LZ:2,FR:5,SE:5,YQ:-4},tags:["庆余年","诗酒","守护","成长"],desc:"你是古代文里最有趣的主角。从南庆到北齐，你用诗酒和智慧对抗着命运。你看起来随性，但内心深处始终保留着对理想和在乎之人的守护。"}
+  ],
+  female: [
+    {id:21,name:"禾晏",source:"长嫡",title:"嫡女权谋",coords:{LZ:5,FR:6,SE:7,YQ:-6},tags:["嫡女","权谋","成长","守护"],desc:"你是古言文里最聪慧的嫡女。从深闺到朝堂，你用智慧和权谋守护着家族。步步为营却始终不失本心，内心深处保留着对公平的追求。"},
+    {id:22,name:"楚乔",source:"楚乔传",title:"星玥之魂",coords:{LZ:8,FR:3,SE:7,YQ:-6},tags:["楚乔传","女强","守护","成长"],desc:"你是古言文里最坚强的女强人。从星玥到楚乔，你用坚强和守护对抗着命运。内心深处始终保留着对世界的守护和对自由的渴望。"},
+    {id:23,name:"盛明兰",source:"知否知否",title:"明兰之智",coords:{LZ:5,FR:3,SE:9,YQ:-7},tags:["知否","成长","权谋","守护"],desc:"你是古言文里最聪慧的庶女。从明兰到知否，你用智慧和权谋守护着家族。内心深处始终保留着对家族的守护和对公平的追求。"},
+    {id:24,name:"甄嬛",source:"后宫·甄嬛传",title:"甄嬛之谋",coords:{LZ:7,FR:2,SE:8,YQ:-8},tags:["甄嬛传","权谋","蜕变","爱情"],desc:"你是古言文里最聪慧的妃子。从甄嬛到后宫，你用权谋和智慧守护着爱情。你的蜕变让人唏嘘，却也让人深深折服于你的生存智慧。"},
+    {id:25,name:"李未央",source:"锦绣未央",title:"未央之谋",coords:{LZ:7,FR:5,SE:8,YQ:-7},tags:["锦绣未央","重生","权谋","守护"],desc:"你是古言文里最坚韧的庶女。从重生到未央，你用权谋和坚韧守护着所爱之人。内心深处始终保留着对命运的反抗和对爱情的坚守。"},
+    {id:26,name:"扶摇",source:"扶摇皇后",title:"扶摇之志",coords:{LZ:9,FR:5,SE:7,YQ:-5},tags:["扶摇皇后","女强","成长","守护"],desc:"你是古言文里最坚强的女强人。从扶摇到皇后，你用坚强和守护对抗着命运。内心深处始终保留着对世界的守护和对命运的反抗。"},
+    {id:27,name:"白浅",source:"三生三世十里桃花",title:"浅浅之恋",coords:{LZ:8,FR:7,SE:6,YQ:-7},tags:["三生三世","仙侠","爱情","守护"],desc:"你是仙侠文里最强大的上神。从白浅到浅浅，你用爱情和守护对抗着命运。内心深处始终保留着对爱情的守护和对真心的珍惜。"},
+    {id:28,name:"花千骨",source:"花千骨",title:"花千骨心",coords:{LZ:4,FR:3,SE:9,YQ:-8},tags:["花千骨","守护","成长","虐恋"],desc:"你是仙侠文里最让人心疼的主角。从花千骨到白子画，你用守护和成长对抗着命运。哪怕付出生命也无怨无悔。"},
+    {id:29,name:"程少商",source:"星汉灿烂",title:"星汉之辉",coords:{LZ:6,FR:4,SE:8,YQ:-6},tags:["星汉灿烂","成长","守护","爱情"],desc:"你是古言文里最聪慧的公主。你用智慧和守护对抗着命运，内心深处始终保留着对爱情的守护和对真实的坚守。"},
+    {id:30,name:"司藤",source:"司藤",title:"藤蔓之爱",coords:{LZ:8,FR:6,SE:7,YQ:-6},tags:["司藤","爱情","守护","独立"],desc:"你是现代文里最独特的女子。你用爱情和守护对抗着命运，内心深处始终保留着对自我的坚守。"},
+    {id:31,name:"小兰花",source:"苍兰诀",title:"兰花之恋",coords:{LZ:6,FR:5,SE:9,YQ:-8},tags:["苍兰诀","仙侠","爱情","守护"],desc:"你是仙侠文里最让人心疼的仙子。从小兰花到苍兰诀，你用爱情和守护对抗着命运，内心始终保留着对真实的追求。"},
+    {id:32,name:"沈妙",source:"将门毒后",title:"将门之毒",coords:{LZ:6,FR:4,SE:9,YQ:-8},tags:["将门毒后","重生","权谋","守护"],desc:"你是古言文里最毒辣的将门之女。从重生到将门，你用毒辣和权谋守护着家族。内心深处始终保留着对正义的坚守。"},
+    {id:33,name:"黎苏苏",source:"护心",title:"护心之恋",coords:{LZ:7,FR:4,SE:8,YQ:-7},tags:["护心","仙侠","爱情","牺牲"],desc:"你是仙侠文里最坚强的仙子。从黎苏苏到护心，你用坚强和守护对抗着命运，内心深处保留着对爱情的守护和对牺牲的勇气。"},
+    {id:34,name:"曲小檀",source:"双世宠妃",title:"双世之恋",coords:{LZ:5,FR:3,SE:8,YQ:-8},tags:["双世宠妃","穿越","爱情","守护"],desc:"你是穿越文里最让人心疼的女子。从曲小檀到双世，你用爱情和守护对抗着命运，内心深处始终保留着对幸福的追求。"},
+    {id:35,name:"姜雪宁",source:"神医凰后",title:"凰后之智",coords:{LZ:7,FR:4,SE:9,YQ:-8},tags:["神医凰后","穿越","权谋","守护"],desc:"你是穿越文里最聪慧的女子。你用权谋和智慧守护着国家，内心深处保留着对公正的追求。"},
+    {id:36,name:"沈璃",source:"凤囚凰",title:"凤囚凰心",coords:{LZ:7,FR:6,SE:8,YQ:-7},tags:["凤囚凰","重生","权谋","守护"],desc:"你是古言文里最聪慧的公主。从重生到凤囚凰，你用权谋和智慧守护着国家，内心深处始终保留着对爱情的坚守。"},
+    {id:37,name:"小乔",source:"三国演义",title:"小乔之恋",coords:{LZ:3,FR:2,SE:7,YQ:-9},tags:["三国","爱情","守护","深情"],desc:"你是历史文里最让人心疼的女子。从小乔到三国，你用爱情和守护对抗着命运，那份深情是你最大的力量。"},
+    {id:38,name:"白风夕",source:"凤于九天",title:"凤于九天",coords:{LZ:8,FR:7,SE:6,YQ:-5},tags:["凤于九天","女强","权谋","守护"],desc:"你是女频文里最强大的女强人。从凤于九天到世界之巅，你用权谋和实力守护着世界，内心深处保留着对自由的追求。"},
+    {id:39,name:"时宜",source:"一生一世",title:"时宜之恋",coords:{LZ:4,FR:3,SE:8,YQ:-9},tags:["一生一世","爱情","守护","成长"],desc:"你是现代文里最让人心疼的女子。从时宜到一生一世，你用爱情和守护对抗着命运，那份深情跨越了生生世世。"},
+    {id:40,name:"楚玉",source:"凤囚凰",title:"楚玉之谋",coords:{LZ:6,FR:5,SE:8,YQ:-7},tags:["穿越","权谋","守护","国家"],desc:"你是穿越文里最聪慧的女子。你用权谋和智慧守护着国家，内心深处始终保留着对真爱的坚守。"}
+  ],
+  misc: [
+    {id:41,name:"花城",source:"天官赐福",title:"绝境信徒",coords:{LZ:8,FR:9,SE:-9,YQ:-9},tags:["天官赐福","绝境","守护","信仰"],desc:"你是纯爱文里最极致的守护者。你用信仰和守护对抗着命运，哪怕在绝境中也从未动摇对谢怜的守护。"},
+    {id:42,name:"谢怜",source:"天官赐福",title:"身在无间",coords:{LZ:5,FR:7,SE:9,YQ:-7},tags:["天官赐福","善良","守护","信仰"],desc:"你是纯爱文里最善良的上神。你用善良和守护对抗着命运，哪怕被打落尘埃也不改初心。"},
+    {id:43,name:"魏无羡",source:"魔道祖师",title:"鬼道归途",coords:{LZ:2,FR:-5,SE:4,YQ:-9},tags:["魔道祖师","鬼道","守护","意难平"],desc:"你是纯爱文里最让人意难平的主角。你用鬼道和守护对抗着命运，那份深情让无数人为之落泪。"},
+    {id:44,name:"蓝忘机",source:"魔道祖师",title:"问灵十三",coords:{LZ:7,FR:-4,SE:7,YQ:-8},tags:["魔道祖师","问灵","守护","无声"],desc:"你是纯爱文里最冷漠的上仙。你看起来冷酷，但内心深处始终保留着对魏无羡的守护，用无声的行动表达着一切。"},
+    {id:45,name:"洛冰河",source:"人渣反派自救系统",title:"天魔偏执",coords:{LZ:9,FR:8,SE:-8,YQ:-9},tags:["人渣反派","天魔","偏执","守护"],desc:"你是穿书文里最偏执的天魔。你用偏执和守护对抗着命运，偏执到让人心疼，却始终深情如一。"},
+    {id:46,name:"沈清秋",source:"人渣反派自救系统",title:"穿书自救",coords:{LZ:5,FR:3,SE:5,YQ:-5},tags:["人渣反派","穿书","守护","聪明"],desc:"你是穿书文里最聪明的反派。你用智慧和守护对抗着命运，内心深处始终保留着对洛冰河的守护和对命运的反抗。"},
+    {id:47,name:"墨燃",source:"二哈和他的白猫师尊",title:"前世今生",coords:{LZ:8,FR:8,SE:-5,YQ:-8},tags:["二哈","前世","守护","复杂"],desc:"你是纯爱文里最复杂的男主。你用前世和今生守护着楚晚宁，跨越生死的羁绊令人动容。"},
+    {id:48,name:"楚晚宁",source:"二哈和他的白猫师尊",title:"师尊之心",coords:{LZ:6,FR:3,SE:7,YQ:-7},tags:["二哈","师尊","守护","温柔"],desc:"你是纯爱文里最温柔的师尊。你用温柔和守护对抗着命运，在温柔外表下藏着无限深情。"},
+    {id:49,name:"沈巍",source:"镇魂",title:"万年沉默",coords:{LZ:8,FR:9,SE:-3,YQ:-9},tags:["镇魂","万年","守护","沉默"],desc:"你是纯爱文里最沉默的守护者。你用沉默和守护对抗着命运，万年的等待只为一人。"},
+    {id:50,name:"赵云澜",source:"镇魂",title:"特调之心",coords:{LZ:3,FR:-5,SE:5,YQ:-7},tags:["镇魂","特调","守护","成长"],desc:"你是纯爱文里最可靠的特调。你看起来普通，但内心深处始终保留着对沈巍的守护和对真相的追求。"},
+    {id:51,name:"贺朝",source:"全球高考",title:"骚话藏真",coords:{LZ:-1,FR:-7,SE:6,YQ:-8},tags:["全球高考","骚话","守护","嘴贱心软"],desc:"你是无限流文里最有趣的男主。你用骚话和守护对抗着命运，嘴贱心软是你的标签，守护才是你的本质。"},
+    {id:52,name:"费渡",source:"默读",title:"深渊猎手",coords:{LZ:-7,FR:4,SE:-4,YQ:-7},tags:["默读","深渊","智谋","守护"],desc:"你是悬疑文里最深不可测的猎手。优雅的外表下藏着深渊，却用自己的方式守护着在乎的人。算计与深情并存，让人无法看透。"},
+    {id:53,name:"谢俞",source:"默读",title:"沉默侦探",coords:{LZ:-2,FR:-6,SE:7,YQ:-6},tags:["默读","侦探","守护","沉默"],desc:"你是悬疑文里最沉默的侦探。用逻辑和沉默拨开每一层迷雾，守护着那些无法发声的人。你的内心比任何人都更敏感，却选择用冷静包裹所有情绪。"},
+    {id:54,name:"苏梦枕",source:"庆余年",title:"侠骨温柔",coords:{LZ:5,FR:-3,SE:6,YQ:-6},tags:["庆余年","侠骨","温柔","守护"],desc:"你是古代文里最有侠气的人物。表面温柔如玉，内里侠骨铮铮。你用自己的方式守护着在乎的人，那份温柔与坚定让人难以抗拒。"},
+    {id:55,name:"桑桑",source:"将夜",title:"天道之殇",coords:{LZ:9,FR:9,SE:-1,YQ:-8},tags:["将夜","天道","守护","命运"],desc:"你是仙侠文里最悲情的存在。从小侍女到天道，你的命运充满了矛盾与挣扎。你内心深处始终保留着对宁缺的守护，用最朴素的情感对抗着最宏大的命运。"},
+    {id:56,name:"江停",source:"破云",title:"缉毒之刃",coords:{LZ:3,FR:-7,SE:8,YQ:-5},tags:["破云","缉毒","守护","正义"],desc:"你是悬疑文里最可靠的警察。你用缉毒和守护对抗着黑暗，哪怕满身伤痕也要守护那一份光明。"},
+    {id:57,name:"江澄",source:"陈情令",title:"紫电三毒",coords:{LZ:7,FR:-3,SE:6,YQ:-6},tags:["陈情令","傲娇","守护","意难平"],desc:"你是仙侠文里最傲娇的宗主。嘴上说着狠话，内心却始终守护着你在乎的人。那份傲娇下的深情，是最让人意难平的存在。"},
+    {id:58,name:"游惑",source:"全球高考",title:"系统之外",coords:{LZ:0,FR:5,SE:3,YQ:-7},tags:["全球高考","系统","神秘","守护"],desc:"你是无限流文里最神秘的男主。你看起来普通，但内心深处始终保留着对贺朝的守护，神秘的存在背后藏着无尽深情。"},
+    {id:59,name:"段嘉许",source:"偷偷藏不住",title:"暗恋成真",coords:{LZ:3,FR:-4,SE:7,YQ:-8},tags:["偷偷藏不住","暗恋","温柔","治愈"],desc:"你是校园甜宠文里最温柔的男主。你的暗恋是小心翼翼的温柔，喜欢一个人就愿意为她扛下所有。偷偷藏不住的不只是秘密，还有那份跨越时光的深情。"},
+    {id:60,name:"盛望",source:"伪装学渣",title:"学渣伪装",coords:{LZ:-5,FR:6,SE:5,YQ:-8},tags:["伪装学渣","校园","成长","治愈"],desc:"你是校园文里最倔强的少年。从伪装学渣到真正学霸，你用努力和守护书写着青春。偷偷变好的不只是成绩，还有那份与江添并肩的时光。"}
+  ]
+};
+
+const GENRE_REC = {
+  "玄幻":"玄幻的世界里，强者为尊，但你的命格告诉我们，真正的强大不只是力量。",
+  "仙侠":"仙侠的世界充满了命中注定与无可奈何，你的命格与这份宿命感高度共鸣。",
+  "都市":"在都市的钢铁丛林中，你的命格特质将让你找到独特的生存之道。",
+  "无限流":"无限流的生死考验最能激发你的潜能，你的命格天生适合在绝境中爆发。",
+  "科幻":"科幻的宏大宇宙中，你的命格将带你突破人类的认知边界。",
+  "历史":"历史的厚重感与你的命格气质高度契合，你注定是那个逆流而上的人。",
+  "悬疑":"悬疑文里，你的智识与洞察力将成为最锋利的武器。",
+  "轻小说":"轻小说的情感细腻度与你的命格共鸣，那些微妙的羁绊你都懂。",
+  "言情":"言情的世界为你的命格提供了最温柔的注脚，深情与执念都将有所归处。",
+  "恐怖":"恐怖文里，你面对黑暗的方式将展现命格最原始的力量。",
+  "古言":"古言的世界里，权谋与深情并存，你的命格将在这里绽放出最极致的光芒。",
+  "甜宠":"甜宠的世界让你的命格得以温柔着陆，那份被珍视的感觉是你最深的渴望。",
+  "穿越":"穿越的世界里，你的命格将帮你在既定命运中走出属于自己的路。",
+  "宫斗":"宫斗的暗流之中，你的命格将成为你最有力的护盾与利剑。",
+  "纯爱/BL":"纯爱的世界里，你的命格注定会遇到那个让你为之倾尽一切的人。",
+  "GL/百合":"百合的世界里，你的命格将绽放出最细腻的情感之花。",
+  "电竞":"电竞赛场上，你的命格将成为队友最可靠的依靠。",
+  "校园":"校园的青春里，你的命格将留下最深刻的印记。",
+  "娱乐圈":"娱乐圈的浮华中，你的命格将带你找到真正属于自己的舞台。",
+  "快穿":"快穿的无数世界里，你的命格始终如一，那是你最深的执念。",
+  "穿书":"穿书的世界里，你的命格将帮你在既定命运中走出属于自己的路。",
+  "ABO":"ABO世界里，命格与本性的博弈将在你身上展现得淋漓尽致。",
+  "悬疑推理":"悬疑推理的谜题正等待你的命格去揭开最后的真相。"
+};
+
+// ==================== STATE ====================
+let state = {
+  gender: null,
+  genres: [],
+  questions: [],
+  currentQ: 0,
+  scores: { LZ: 0, FR: 0, SE: 0, YQ: 0 },
+  result: null,
+  codeStr: '',
+  answers: [] // { score, dim } per question
+};
+
+// ==================== SCREEN NAV ====================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => {
+    s.classList.remove('active');
+  });
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.add('active');
+  // 重置滚动位置
+  const sb = el.querySelector('.scroll-body');
+  if (sb) sb.scrollTop = 0;
+}
+
+// ==================== CHAR CAROUSEL ====================
+const charSlides = [
+  { left: 'char-left.png',  leftAlt: '克莱恩', mid: 'char-mid.png',  midAlt: '杨间', right: 'char-right.png', rightAlt: '李火旺' },
+  { left: 'char-right.png', leftAlt: '李火旺', mid: 'char-left.png',  midAlt: '克莱恩', right: 'char-mid.png', rightAlt: '杨间' },
+  { left: 'char-mid.png',   leftAlt: '杨间',   mid: 'char-right.png', midAlt: '李火旺', right: 'char-left.png', rightAlt: '克莱恩' },
+];
+let charSlideIndex = 0;
+let charAnimating = false;
+
+function switchCharSlide(dir) {
+  if (charAnimating) return;
+  charAnimating = true;
+
+  const chars = document.querySelectorAll('#screen-start .char-figure');
+  const dots  = document.querySelectorAll('#screen-start .dot');
+
+  //淡出
+  chars.forEach(c => { c.style.opacity = '0'; c.style.transform = c.classList.contains('mid') ? 'scale(0.92)' : 'scale(0.82)'; });
+
+  setTimeout(() => {
+    charSlideIndex = (charSlideIndex + dir + 3) % 3;
+    const slide = charSlides[charSlideIndex];
+
+    // 更新图片和 alt
+    const imgs = chars[0].querySelector('img');
+    const imgm = chars[1].querySelector('img');
+    const imgr = chars[2].querySelector('img');
+    imgs.src = slide.left;  imgs.alt = slide.leftAlt;
+    imgm.src = slide.mid;   imgm.alt = slide.midAlt;
+    imgr.src = slide.right; imgr.alt = slide.rightAlt;
+
+    // 更新 dots
+    dots.forEach((d, i) => d.classList.toggle('active', i === charSlideIndex));
+
+    //淡入
+    requestAnimationFrame(() => {
+      chars[0].style.opacity = '0.55'; chars[0].style.transform = 'scale(0.88)';
+      chars[1].style.opacity = '1';    chars[1].style.transform = 'scale(1)';
+      chars[2].style.opacity = '0.55'; chars[2].style.transform = 'scale(0.88)';
+      setTimeout(() => { charAnimating = false; }, 300);
+    });
+  }, 350);
+}
+
+// 点击左右角色切换
+document.addEventListener('DOMContentLoaded', () => {
+  const leftChar  = document.getElementById('char-left');
+  const rightChar = document.getElementById('char-right');
+  if (leftChar)  leftChar.addEventListener('click',  () => switchCharSlide(-1));
+  if (rightChar) rightChar.addEventListener('click', () => switchCharSlide(1));
+  // 中间角色也可以点击 → 下一组
+  const midChar = document.getElementById('char-mid');
+  if (midChar) midChar.addEventListener('click', () => switchCharSlide(1));
+  // 分页点点击
+  const dots = document.querySelectorAll('#screen-start .dot');
+  dots.forEach((d, i) => {
+    d.addEventListener('click', () => {
+      if (charAnimating || i === charSlideIndex) return;
+      const diff = i - charSlideIndex;
+      switchCharSlide(diff > 0 ? diff : diff + 3);
+    });
+  });
+});
+
+// ==================== GENDER ====================
+function selectGender(g) {
+  state.gender = g;
+  ['male','female','misc'].forEach(k => {
+    document.getElementById('card-' + k).classList.toggle('selected', k === g);
+  });
+  document.getElementById('btn-gender-next').disabled = false;
+}
+
+function goToGenre() {
+  if (!state.gender) return;
+  state.genres = [];
+  renderGenreGrid();
+  updateGenreUI();
+  showScreen('screen-genre');
+}
+
+// ==================== GENRE ====================
+
+// 流派图标映射（16x16 小图标，silver-blue 风格）
+const GENRE_ICONS = {
+  "玄幻":      `<svg viewBox="0 0 16 16" fill="none"><polygon points="8,1 15,5.5 15,10.5 8,15 1,10.5 1,5.5" stroke="rgba(180,200,230,0.7)" stroke-width="1.2" fill="rgba(180,200,230,0.1)"/><circle cx="8" cy="8" r="2" fill="rgba(180,200,230,0.8)"/></svg>`,
+  "仙侠":      `<svg viewBox="0 0 16 16" fill="none"><path d="M8 1L10 7H15L11 10.5L12.5 15L8 12L3.5 15L5 10.5L1 7H6Z" stroke="rgba(180,200,230,0.7)" stroke-width="1" fill="rgba(180,200,230,0.1)"/></svg>`,
+  "都市":      `<svg viewBox="0 0 16 16" fill="none"><rect x="2" y="5" width="4" height="10" rx="0.5" stroke="rgba(180,200,230,0.7)" stroke-width="1.1" fill="rgba(180,200,230,0.1)"/><rect x="7" y="2" width="4" height="13" rx="0.5" stroke="rgba(180,200,230,0.7)" stroke-width="1.1" fill="rgba(180,200,230,0.1)"/><rect x="12" y="7" width="2" height="8" rx="0.5" stroke="rgba(180,200,230,0.7)" stroke-width="1.1" fill="rgba(180,200,230,0.1)"/></svg>`,
+  "无限流":    `<svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="rgba(180,200,230,0.7)" stroke-width="1.2" stroke-dasharray="2 1.5"/><path d="M8 2.5 C8 2.5 10 5 8 8 C6 11 8 13.5 8 13.5" stroke="rgba(180,200,230,0.7)" stroke-width="1.1" fill="none"/></svg>`,
+  "科幻":      `<svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2" stroke="rgba(180,200,230,0.7)" stroke-width="1.1"/><ellipse cx="8" cy="8" rx="6" ry="2.5" stroke="rgba(180,200,230,0.7)" stroke-width="1.1" transform="rotate(-30 8 8)"/><line x1="8" y1="1" x2="8" y2="3" stroke="rgba(180,200,230,0.7)" stroke-width="1.1"/><line x1="8" y1="13" x2="8" y2="15" stroke="rgba(180,200,230,0.7)" stroke-width="1.1"/></svg>`,
+  "历史":      `<svg viewBox="0 0 16 16" fill="none"><path d="M2 14V4L8 2L14 4V14L8 12L2 14Z" stroke="rgba(180,200,230,0.7)" stroke-width="1.1" fill="rgba(180,200,230,0.1)"/><line x1="5" y1="6" x2="11" y2="6" stroke="rgba(180,200,230,0.7)" stroke-width="1"/><line x1="5" y1="8.5" x2="9" y2="8.5" stroke="rgba(180,200,230,0.7)" stroke-width="1"/></svg>`,
+  "悬疑":      `<svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="6.5" r="4" stroke="rgba(180,200,230,0.7)" stroke-width="1.1" fill="rgba(180,200,230,0.1)"/><line x1="5.5" y1="5" x2="6.5" y2="6" stroke="rgba(180,200,230,0.7)" stroke-width="1.1"/><circle cx="6.5" cy="6" r="0.8" fill="rgba(180,200,230,0.8)"/><path d="M5 10.5 L8 14 L11 10.5" stroke="rgba(180,200,230,0.7)" stroke-width="1.1" fill="none"/></svg>`,
+  "轻小说":    `<svg viewBox="0 0 16 16" fill="none"><rect x="3" y="2" width="8" height="12" rx="1" stroke="rgba(180,200,230,0.7)" stroke-width="1.1" fill="rgba(180,200,230,0.1)"/><line x1="5" y1="5.5" x2="9" y2="5.5" stroke="rgba(180,200,230,0.7)" stroke-width="1"/><line x1="5" y1="7.5" x2="9" y2="7.5" stroke="rgba(180,200,230,0.7)" stroke-width="1"/><line x1="5" y1="9.5" x2="8" y2="9.5" stroke="rgba(180,200,230,0.7)" stroke-width="1"/></svg>`,
+  "言情":      `<svg viewBox="0 0 16 16" fill="none"><path d="M8 13.5C8 13.5 2 9.5 2 5.5C2 3.5 3.8 2 5.8 2C6.8 2 7.7 2.4 8 3C8.3 2.4 9.2 2 10.2 2C12.2 2 14 3.5 14 5.5C14 9.5 8 13.5 8 13.5Z" stroke="rgba(180,200,230,0.7)" stroke-width="1.1" fill="rgba(180,200,230,0.1)"/></svg>`,
+  "恐怖":      `<svg viewBox="0 0 16 16" fill="none"><path d="M8 2C6 4 3 5 3 9C3 11 4.5 13 8 13C11.5 13 13 11 13 9C13 5 10 4 8 2Z" stroke="rgba(180,200,230,0.7)" stroke-width="1.1" fill="rgba(180,200,230,0.1)"/><circle cx="6.5" cy="7.5" r="1" fill="rgba(180,200,230,0.8)"/><circle cx="9.5" cy="7.5" r="1" fill="rgba(180,200,230,0.8)"/><path d="M6 10.5 Q8 12 10 10.5" stroke="rgba(180,200,230,0.7)" stroke-width="1"/></svg>`,
+  "古言":      `<svg viewBox="0 0 16 16" fill="none"><path d="M3 13V3L8 1.5L13 3V13L8 11L3 13Z" stroke="rgba(180,200,230,0.7)" stroke-width="1.1" fill="rgba(180,200,230,0.08)"/><rect x="6" y="4.5" width="4" height="5" rx="0.5" stroke="rgba(180,200,230,0.7)" stroke-width="1" fill="none"/><line x1="3" y1="6" x2="6" y2="6" stroke="rgba(180,200,230,0.7)" stroke-width="1"/></svg>`,
+  "穿越":      `<svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="rgba(180,200,230,0.7)" stroke-width="1.2" stroke-dasharray="3 2"/><path d="M5 8 H11 M8 5 V11" stroke="rgba(180,200,230,0.7)" stroke-width="1.2"/></svg>`,
+  "甜宠":      `<svg viewBox="0 0 16 16" fill="none"><path d="M3 9C3 9 4 6 8 6C12 6 13 9 13 9" stroke="rgba(180,200,230,0.7)" stroke-width="1.1" fill="none"/><path d="M8 9C8 9 6 11 4 11C4 11 5 13 8 13C11 13 12 11 12 11C12 11 10 9 8 9Z" stroke="rgba(180,200,230,0.7)" stroke-width="1.1" fill="rgba(180,200,230,0.08)"/></svg>`,
+  "宫斗":      `<svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="4" r="2.5" stroke="rgba(180,200,230,0.7)" stroke-width="1.1" fill="rgba(180,200,230,0.1)"/><path d="M3 14V9C3 9 4 8 8 8C12 8 13 9 13 9V14" stroke="rgba(180,200,230,0.7)" stroke-width="1.1" fill="none"/><line x1="5" y1="5.5" x2="6" y2="6" stroke="rgba(180,200,230,0.7)" stroke-width="0.9"/><line x1="11" y1="5.5" x2="10" y2="6" stroke="rgba(180,200,230,0.7)" stroke-width="0.9"/></svg>`,
+  "纯爱/BL":   `<svg viewBox="0 0 16 16" fill="none"><path d="M8 13.5C8 13.5 2 9.5 2 5.5C2 3.5 3.8 2 5.8 2C6.8 2 7.7 2.4 8 3" stroke="rgba(180,200,230,0.7)" stroke-width="1.1" fill="none"/><path d="M8 13.5C8 13.5 14 9.5 14 5.5C14 3.5 12.2 2 10.2 2C9.2 2 8.3 2.4 8 3" stroke="rgba(180,200,230,0.7)" stroke-width="1.1" fill="none"/></svg>`,
+  "GL/百合":   `<svg viewBox="0 0 16 16" fill="none"><circle cx="5.5" cy="5" r="3" stroke="rgba(180,200,230,0.7)" stroke-width="1.1" fill="rgba(180,200,230,0.1)"/><circle cx="10.5" cy="5" r="3" stroke="rgba(180,200,230,0.7)" stroke-width="1.1" fill="rgba(180,200,230,0.1)"/><path d="M5.5 8V10M10.5 8V10" stroke="rgba(180,200,230,0.7)" stroke-width="1.1"/></svg>`,
+  "电竞":      `<svg viewBox="0 0 16 16" fill="none"><rect x="2" y="5" width="12" height="8" rx="1.5" stroke="rgba(180,200,230,0.7)" stroke-width="1.1" fill="rgba(180,200,230,0.1)"/><path d="M6 2H10L8.5 5H7.5L6 2Z" fill="rgba(180,200,230,0.6)"/><line x1="5" y1="9" x2="11" y2="9" stroke="rgba(180,200,230,0.7)" stroke-width="1"/><line x1="8" y1="9" x2="8" y2="11" stroke="rgba(180,200,230,0.7)" stroke-width="1"/></svg>`,
+  "校园":      `<svg viewBox="0 0 16 16" fill="none"><path d="M8 1L15 5V6L8 10L1 6V5L8 1Z" stroke="rgba(180,200,230,0.7)" stroke-width="1.1" fill="rgba(180,200,230,0.1)"/><line x1="8" y1="10" x2="8" y2="14" stroke="rgba(180,200,230,0.7)" stroke-width="1.1"/><line x1="5" y1="13" x2="11" y2="13" stroke="rgba(180,200,230,0.7)" stroke-width="1.1"/></svg>`,
+  "娱乐圈":    `<svg viewBox="0 0 16 16" fill="none"><polygon points="8,1 9.5,5.5 14.5,5.5 10.8,8.5 12.2,13.5 8,10.5 3.8,13.5 5.2,8.5 1.5,5.5 6.5,5.5" stroke="rgba(180,200,230,0.7)" stroke-width="1" fill="rgba(180,200,230,0.1)"/></svg>`,
+  "快穿":      `<svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2.5" stroke="rgba(180,200,230,0.7)" stroke-width="1.1"/><path d="M8 2.5V4.5M8 11.5V13.5M2.5 8H4.5M11.5 8H13.5M4.2 4.2L5.5 5.5M10.5 10.5L11.8 11.8M11.8 4.2L10.5 5.5M5.5 10.5L4.2 11.8" stroke="rgba(180,200,230,0.7)" stroke-width="1"/></svg>`,
+  "穿书":      `<svg viewBox="0 0 16 16" fill="none"><rect x="3" y="2" width="9" height="12" rx="1" stroke="rgba(180,200,230,0.7)" stroke-width="1.1" fill="rgba(180,200,230,0.1)"/><path d="M8 8L12 8" stroke="rgba(180,200,230,0.7)" stroke-width="1.1"/><path d="M10 6L12 8L10 10" stroke="rgba(180,200,230,0.7)" stroke-width="1.1" fill="none"/></svg>`,
+  "ABO":       `<svg viewBox="0 0 16 16" fill="none"><circle cx="4.5" cy="6" r="2.5" stroke="rgba(180,200,230,0.7)" stroke-width="1.1" fill="rgba(180,200,230,0.08)"/><circle cx="11.5" cy="6" r="2.5" stroke="rgba(180,200,230,0.7)" stroke-width="1.1" fill="rgba(180,200,230,0.08)"/><circle cx="8" cy="11.5" r="2.5" stroke="rgba(180,200,230,0.7)" stroke-width="1.1" fill="rgba(180,200,230,0.08)"/></svg>`,
+  "悬疑推理":  `<svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="7" r="5" stroke="rgba(180,200,230,0.7)" stroke-width="1.1" fill="rgba(180,200,230,0.08)"/><path d="M6 7 L7 8 L9 6" stroke="rgba(180,200,230,0.7)" stroke-width="1.1" fill="none"/><line x1="8" y1="12" x2="8" y2="14" stroke="rgba(180,200,230,0.7)" stroke-width="1.1"/><line x1="6" y1="14" x2="10" y2="14" stroke="rgba(180,200,230,0.7)" stroke-width="1.1"/></svg>`
+};
+
+function renderGenreGrid() {
+  const grid = document.getElementById('genre-grid');
+  const list = GENRES[state.gender] || [];
+  grid.innerHTML = list.map(g => {
+    const icon = GENRE_ICONS[g] || `<svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5" stroke="rgba(180,200,230,0.7)" stroke-width="1.2"/></svg>`;
+    return `<div class="genre-tag" data-genre="${g}" onclick="toggleGenre(this,'${g}')">
+      <span class="tag-corner"></span>
+      <span class="genre-tag-icon">${icon}</span>
+      <span class="genre-tag-text">${g}</span>
+    </div>`;
+  }).join('');
+}
+
+function toggleGenre(el, g) {
+  if (el.classList.contains('maxed')) return;
+  if (el.classList.contains('selected')) {
+    el.classList.remove('selected');
+    state.genres = state.genres.filter(x => x !== g);
+  } else {
+    if (state.genres.length >= 3) return;
+    el.classList.add('selected');
+    state.genres.push(g);
+  }
+  updateGenreUI();
+}
+
+function updateGenreUI() {
+  const cnt = state.genres.length;
+  document.getElementById('genre-selected-count').textContent = cnt;
+  document.getElementById('btn-genre-next').disabled = cnt < 3;
+  // 控制 maxed 状态
+  document.querySelectorAll('.genre-tag').forEach(t => {
+    if (!t.classList.contains('selected') && cnt >= 3) {
+      t.classList.add('maxed');
+    } else {
+      t.classList.remove('maxed');
+    }
+  });
+}
+
+// ==================== QUIZ ====================
+function startQuiz() {
+  if (state.genres.length < 3) return;
+  state.questions = shuffle([...QUESTIONS[state.gender]]);
+  state.currentQ = 0;
+  state.scores = { LZ: 0, FR: 0, SE: 0, YQ: 0 };
+  showScreen('screen-quiz');
+  renderQuestion();
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// 答题选项图标
+const OPTION_ICONS = [
+  `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" stroke="currentColor" stroke-width="1.5"/>
+    <path d="M12 4l-2 8h4l-2 8" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+  </svg>`,
+  `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M14.5 9.5L19 5M19 5a2.121 2.121 0 00-3-3L11.5 6.5M19 5L20.5 3.5M11.5 6.5l-6 6M11.5 6.5L8.5 9.5M5.5 12.5L2 16a2.828 2.828 0 104 4l3.5-3.5M5.5 12.5l3-3M5.5 12.5l6-6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/>
+  </svg>`,
+  `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM12 4v16c3.31 0 6-2.69 6-6s-2.69-6-6-6z" stroke="currentColor" stroke-width="1.5"/>
+    <path d="M8 10h2M14 10h2M12 14v4" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"/>
+  </svg>`,
+  `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" stroke="currentColor" stroke-linejoin="round" stroke-width="1.5"/>
+  </svg>`
+];
+
+function renderQuestion() {
+  const q = state.questions[state.currentQ];
+  const total = state.questions.length;
+  const pct = ((state.currentQ) / total * 100).toFixed(0);
+
+  document.getElementById('quiz-dim-name').textContent = q.dimName;
+  document.getElementById('quiz-progress-num').textContent = `${state.currentQ + 1} / ${total}`;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('quiz-question').textContent = q.text;
+
+  // 渲染选项，按原始顺序（回看时保持一致）
+  const container = document.getElementById('quiz-options');
+  // 使用题目索引作为 seed 保证同一题选项顺序一致
+  const opts = seedShuffle([...q.opts], state.currentQ);
+  container.innerHTML = opts.map((o, i) =>
+    `<button class="option-btn" data-score="${o.score}" data-dim="${q.dim}" data-text="${encodeURIComponent(o.text)}" onclick="selectOption(this)">
+      <div class="option-icon">${OPTION_ICONS[i % OPTION_ICONS.length]}</div>
+      <span class="option-text">${o.text}</span>
+      <div class="option-dots">
+        <span class="option-dot"></span>
+        <span class="option-dot"></span>
+        <span class="option-dot"></span>
+      </div>
+    </button>`
+  ).join('');
+
+  // 如果这题已答过，恢复选中状态
+  const prev = state.answers[state.currentQ];
+  if (prev) {
+    container.querySelectorAll('.option-btn').forEach(b => {
+      b.classList.add('disabled');
+      if (b.getAttribute('data-text') === encodeURIComponent(prev.text)) {
+        b.classList.add('selected');
+      }
+    });
+  }
+
+  // 错落入场
+  const btns = container.querySelectorAll('.option-btn');
+  btns.forEach((b, i) => {
+    setTimeout(() => b.classList.add('visible'), i * 80 + 40);
+  });
+
+  // 更新导航按钮
+  updateQuizNav();
+
+  // 滚到顶
+  const sb = document.querySelector('#screen-quiz .scroll-body');
+  if (sb) sb.scrollTop = 0;
+}
+
+// 带种子随机洗牌（同一 seed 结果一致）
+function seedShuffle(arr, seed) {
+  const a = [...arr];
+  let s = seed + 1;
+  for (let i = a.length - 1; i > 0; i--) {
+    s = (s * 1103515245 + 12345) & 0x7fffffff;
+    const j = s % (i + 1);
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function updateQuizNav() {
+  const total = state.questions.length;
+  document.getElementById('btn-prev-q').disabled = state.currentQ <= 0;
+  document.getElementById('btn-next-q').disabled = state.currentQ >= total - 1;
+}
+
+function prevQuestion() {
+  if (state.currentQ > 0) {
+    state.currentQ--;
+    renderQuestion();
+  }
+}
+
+function nextQuestion() {
+  if (state.currentQ < state.questions.length - 1) {
+    state.currentQ++;
+    renderQuestion();
+  }
+}
+
+function selectOption(el) {
+  if (el.classList.contains('disabled')) return;
+  const score = parseInt(el.getAttribute('data-score'), 10);
+  const dim = el.getAttribute('data-dim');
+  const text = decodeURIComponent(el.getAttribute('data-text'));
+
+  // 锁定所有选项
+  document.querySelectorAll('.option-btn').forEach(b => {
+    b.classList.add('disabled');
+  });
+  el.classList.add('selected');
+
+  // 如果这题之前答过，先撤回旧分数
+  const prev = state.answers[state.currentQ];
+  if (prev) {
+    state.scores[prev.dim] -= prev.score;
+  }
+  // 记录新答案
+  state.answers[state.currentQ] = { score, dim, text };
+  state.scores[dim] += score;
+
+  // 更新导航
+  updateQuizNav();
+
+  // 450ms 后跳下一题
+  setTimeout(() => {
+    if (state.currentQ < state.questions.length - 1) {
+      state.currentQ++;
+      renderQuestion();
+    } else {
+      goToResult();
+    }
+  }, 450);
+}
+
+function confirmBack() {
+  if (confirm('确定要退出答题？进度将不会保存。')) {
+    showScreen('screen-genre');
+  }
+}
+
+// ==================== RESULT ====================
+function goToResult() {
+  showScreen('screen-loading');
+  setTimeout(() => {
+    calcResult();
+    renderResult();
+    showScreen('screen-result');
+    // 延迟触发动画（等 screen 过渡完成）
+    setTimeout(animateResult, 100);
+  }, 1600);
+}
+
+function calcResult() {
+  const chars = CHARS[state.gender];
+  const U = state.scores;
+  let best = null, bestDist = Infinity;
+  chars.forEach(c => {
+    const d = Math.sqrt(
+      Math.pow(U.LZ - c.coords.LZ, 2) +
+      Math.pow(U.FR - c.coords.FR, 2) +
+      Math.pow(U.SE - c.coords.SE, 2) +
+      Math.pow(U.YQ - c.coords.YQ, 2)
+    );
+    if (d < bestDist) { bestDist = d; best = c; }
+  });
+  state.result = best;
+  state.codeStr = getCodeStr(U);
+}
+
+function getDimLabel(dim, score) {
+  const map = {
+    LZ: { pos: '力', neg: '谋' },
+    FR: { pos: '非人', neg: '凡' },
+    SE: { pos: '善', neg: '恶' },
+    YQ: { pos: '欲', neg: '情' }
+  };
+  const m = map[dim];
+  if (score >= 7) return `极·${m.pos}`;
+  if (score >= 4) return m.pos;
+  if (score >= 1) return `微·${m.pos}`;
+  if (score >= -3) return '均';
+  if (score >= -6) return `微·${m.neg}`;
+  return `极·${m.neg}`;
+}
+
+function getCodeStr(scores) {
+  return ['LZ','FR','SE','YQ'].map(d => getDimLabel(d, scores[d])).join(' | ');
+}
+
+function renderResult() {
+  const r = state.result;
+  const scores = state.scores;
+  const codeStr = state.codeStr;
+  const recText = state.genres.map(g => GENRE_REC[g] || `${g}的世界正等待着你的命格去书写。`).join(' ');
+
+  // 将命格代码拆分为四段，用于横排展示
+  const codeParts = codeStr.split(' | ');
+
+  // 生成角色描述引用句（截取第一句话，或用专门的 quote 字段）
+  const quoteText = r.desc ? r.desc.replace(/。.*$/, '。') : '';
+
+  const html = `
+    <!-- 顶部命格代码 -->
+    <div class="result-block res-header" id="rb-code">
+      <div class="res-header-label">CPTI · 你的网文命格</div>
+      <div class="res-code-row" id="code-display">
+        ${codeParts.map((p, i) =>
+          `<span class="res-code-part">${p}</span>${i < codeParts.length - 1 ? '<span class="res-code-sep">|</span>' : ''}`
+        ).join('')}
+      </div>
+      <div class="res-header-sub">网文人格推演测试</div>
+    </div>
+
+    <!-- 角色立绘区 -->
+    <div class="result-block res-portrait-wrap" id="rb-portrait">
+      <div class="res-portrait-glow"></div>
+      <div class="res-portrait-img-wrap">
+        <img src="images/chars/char${r.id}.png" alt="${r.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <div class="char-placeholder" style="display:none; width:180px;height:240px; background:linear-gradient(135deg,rgba(160,170,200,0.2),rgba(160,170,200,0.05)); border-radius:12px; align-items:center; justify-content:center; flex-direction:column; color:rgba(200,210,230,0.6); font-size:14px;">
+          <div style="font-size:48px; margin-bottom:8px;">🎭</div>
+          <div>${r.name}</div>
+        </div>
+      </div>
+      <div class="res-portrait-info">
+        <div class="res-char-name">${r.name}</div>
+        <div class="res-char-source">《${r.source}》</div>
+        <div class="res-char-badge">${r.title}</div>
+      </div>
+    </div>
+
+    <!-- 引用语 -->
+    <div class="result-block res-quote" id="rb-quote">
+      <span class="res-quote-mark">"</span>
+      <span>${quoteText}</span>
+      <span class="res-quote-mark">"</span>
+    </div>
+
+    <!-- 人物简介 -->
+    <div class="result-block res-glass-card" id="rb-char">
+      <div class="res-section-title">人物简介</div>
+      <div class="res-tags">
+        <span class="res-tag">${r.source}</span>
+        ${r.tags.map(t => `<span class="res-tag">${t}</span>`).join('')}
+      </div>
+      <div class="res-desc">${r.desc}</div>
+    </div>
+
+    <!-- 四维命格图 -->
+    <div class="result-block res-glass-card" id="rb-radar">
+      <div class="res-section-title">四维命格图</div>
+      <div class="res-radar-wrap">
+        <div class="res-radar-svg-container" id="radar-svg-container"></div>
+      </div>
+    </div>
+
+    <!-- 命格解析 -->
+    <div class="result-block res-glass-card dim-block" id="rb-dims">
+      <div class="res-section-title">命格解析</div>
+      ${renderDimRows(scores)}
+    </div>
+
+    <!-- 流派推荐 -->
+    <div class="result-block res-glass-card" id="rb-genre">
+      <div class="res-section-title">流派推荐</div>
+      <div class="rec-genres">${state.genres.map(g => `<span class="rec-genre-tag">${g}</span>`).join('')}</div>
+      <div class="rec-text">${recText}</div>
+    </div>
+  `;
+  document.getElementById('result-inner').innerHTML = html;
+
+  // 展示底部操作栏
+  const bar = document.getElementById('res-action-bar');
+  if (bar) bar.classList.add('show');
+}
+
+function renderDimRows(scores) {
+  const dims = [
+    {key:'LZ', label:'行事风格', pos:'力量', neg:'智谋'},
+    {key:'FR', label:'设定类型', pos:'非人', neg:'人类'},
+    {key:'SE', label:'道德底线', pos:'善',   neg:'恶'},
+    {key:'YQ', label:'情感驱动', pos:'欲望', neg:'情感'}
+  ];
+  return dims.map(d => {
+    const s = scores[d.key];
+    const pct = Math.abs(s) / 9 * 50; // 最多占半边 50%
+    const label = getDimLabel(d.key, s);
+    let fillHtml = '';
+    if (s > 0) {
+      fillHtml = `<div class="dim-bar-fill" data-target="${pct}%" style="width:0%"></div>`;
+    } else if (s < 0) {
+      fillHtml = `<div class="dim-bar-neg" data-target="${pct}%" style="width:0%"></div>`;
+    }
+    return `
+      <div class="dim-row">
+        <div class="dim-labels">
+          <span class="dim-label-s">${d.neg}</span>
+          <span class="dim-label-c">${d.label} · ${label}</span>
+          <span class="dim-label-s">${d.pos}</span>
+        </div>
+        <div class="dim-bar-wrap">
+          <div class="dim-center-tick"></div>
+          ${fillHtml}
+        </div>
+        <div class="dim-score-label">${s > 0 ? '+' : ''}${s}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function animateResult() {
+  // 各块依次入场
+  const blocks = document.querySelectorAll('.result-block');
+  blocks.forEach((b, i) => {
+    setTimeout(() => b.classList.add('show'), i * 180 + 80);
+  });
+
+  // 命格代码行发光效果（延迟到入场后）
+  setTimeout(() => {
+    const row = document.getElementById('code-display');
+    if (row) row.classList.add('glow');
+  }, 600);
+
+  // 绘制 SVG 雷达图
+  setTimeout(() => {
+    drawRadarSVG(state.scores);
+  }, 700);
+
+  // 属性条生长
+  setTimeout(() => {
+    document.querySelectorAll('.dim-bar-fill, .dim-bar-neg').forEach(bar => {
+      const t = bar.getAttribute('data-target');
+      if (t) bar.style.width = t;
+    });
+  }, 1200);
+
+  // 底部操作栏滑入
+  setTimeout(() => {
+    const bar = document.getElementById('res-action-bar');
+    if (bar) bar.classList.add('show');
+  }, 800);
+}
+
+// ==================== SVG RADAR CHART (新版) ====================
+function drawRadarSVG(scores) {
+  const container = document.getElementById('radar-svg-container');
+  if (!container) return;
+
+  const SIZE = 220;
+  const CX = SIZE / 2;
+  const CY = SIZE / 2;
+  const MAX_R = 78; // 最外圈半径
+
+  const dims = [
+    { key: 'LZ', name: '行事风格', top: true  },  // 上
+    { key: 'FR', name: '设定类型', top: false },  // 右
+    { key: 'SE', name: '情感倾向', top: true  },  // 下
+    { key: 'YQ', name: '情感驱动', top: false }   // 左
+  ];
+
+  // 四个方向角度：上=270°, 右=0°, 下=90°, 左=180°（以0°为右方）
+  const angles = [-Math.PI/2, 0, Math.PI/2, Math.PI];
+
+  // 将分数 (-9~9) 映射到 0.15~1 的比例（最小保留 15% 让图形不退化到中心点）
+  function scoreToRatio(s) {
+    return 0.15 + (s + 9) / 18 * 0.85;
+  }
+
+  function pt(i, ratio) {
+    const r = MAX_R * ratio;
+    return {
+      x: CX + Math.cos(angles[i]) * r,
+      y: CY + Math.sin(angles[i]) * r
+    };
+  }
+
+  // 计算数据点
+  const dataPoints = dims.map((d, i) => pt(i, scoreToRatio(scores[d.key])));
+  const polyPts = dataPoints.map(p => `${p.x},${p.y}`).join(' ');
+
+  // 背景同心菱形（3 圈）
+  function ringPoly(ratio) {
+    return [0,1,2,3].map(i => {
+      const p = pt(i, ratio);
+      return `${p.x},${p.y}`;
+    }).join(' ');
+  }
+
+  // 标签位置（在最外圈外侧）
+  const labelR = MAX_R + 24;
+  function labelPt(i) {
+    return {
+      x: CX + Math.cos(angles[i]) * labelR,
+      y: CY + Math.sin(angles[i]) * labelR
+    };
+  }
+
+  // 命格标签
+  const codeLabels = dims.map(d => getDimLabel(d.key, scores[d.key]));
+
+  // 标签文字对齐方式
+  const anchors = ['middle', 'start', 'middle', 'end'];
+  const labelDY = ['-1.2em', '0.35em', '1.4em', '0.35em'];
+
+  const svgNS = 'http://www.w3.org/2000/svg';
+
+  // 构建 SVG
+  const svg = document.createElementNS(svgNS, 'svg');
+  svg.setAttribute('viewBox', `0 0 ${SIZE} ${SIZE}`);
+  svg.setAttribute('width', SIZE);
+  svg.setAttribute('height', SIZE);
+  svg.style.overflow = 'visible';
+
+  // defs：发光滤镜
+  const defs = document.createElementNS(svgNS, 'defs');
+  const filter = document.createElementNS(svgNS, 'filter');
+  filter.setAttribute('id', 'dot-glow');
+  const feGlow = document.createElementNS(svgNS, 'feGaussianBlur');
+  feGlow.setAttribute('stdDeviation', '3');
+  feGlow.setAttribute('result', 'coloredBlur');
+  const feMerge = document.createElementNS(svgNS, 'feMerge');
+  const feMergeNode1 = document.createElementNS(svgNS, 'feMergeNode');
+  feMergeNode1.setAttribute('in', 'coloredBlur');
+  const feMergeNode2 = document.createElementNS(svgNS, 'feMergeNode');
+  feMergeNode2.setAttribute('in', 'SourceGraphic');
+  feMerge.appendChild(feMergeNode1);
+  feMerge.appendChild(feMergeNode2);
+  filter.appendChild(feGlow);
+  filter.appendChild(feMerge);
+  defs.appendChild(filter);
+  svg.appendChild(defs);
+
+  // 背景网格圈
+  [0.33, 0.66, 1.0].forEach((ratio, ri) => {
+    const poly = document.createElementNS(svgNS, 'polygon');
+    poly.setAttribute('points', ringPoly(ratio));
+    poly.setAttribute('fill', 'none');
+    poly.setAttribute('stroke', ri === 2 ? 'rgba(255,80,80,0.3)' : 'rgba(255,80,80,0.15)');
+    poly.setAttribute('stroke-width', '1');
+    svg.appendChild(poly);
+  });
+
+  // 轴线（从中心到顶点）
+  angles.forEach((angle, i) => {
+    const ep = pt(i, 1);
+    const line = document.createElementNS(svgNS, 'line');
+    line.setAttribute('x1', CX); line.setAttribute('y1', CY);
+    line.setAttribute('x2', ep.x); line.setAttribute('y2', ep.y);
+    line.setAttribute('stroke', 'rgba(255,80,80,0.25)');
+    line.setAttribute('stroke-width', '1');
+    svg.appendChild(line);
+  });
+
+  // 数据多边形（初始折叠到中心，用于动画）
+  const poly = document.createElementNS(svgNS, 'polygon');
+  poly.setAttribute('fill', 'rgba(255,50,50,0.15)');
+  poly.setAttribute('stroke', 'rgba(255,50,50,0.85)');
+  poly.setAttribute('stroke-width', '1.5');
+  // 初始点全在中心
+  poly.setAttribute('points', `${CX},${CY} ${CX},${CY} ${CX},${CY} ${CX},${CY}`);
+  svg.appendChild(poly);
+
+  // 数据点（发光圆点）
+  const dots = dataPoints.map((p, i) => {
+    const circle = document.createElementNS(svgNS, 'circle');
+    circle.setAttribute('cx', CX); circle.setAttribute('cy', CY);
+    circle.setAttribute('r', '4');
+    circle.setAttribute('fill', '#fff');
+    circle.setAttribute('filter', 'url(#dot-glow)');
+    circle.style.filter = 'drop-shadow(0 0 5px #ff3333)';
+    svg.appendChild(circle);
+    return circle;
+  });
+
+  // 标签文字
+  dims.forEach((d, i) => {
+    const lp = labelPt(i);
+    const anchor = anchors[i];
+    const label = codeLabels[i];
+
+    // 维度名称
+    const dimText = document.createElementNS(svgNS, 'text');
+    dimText.setAttribute('x', lp.x);
+    dimText.setAttribute('y', lp.y);
+    dimText.setAttribute('text-anchor', anchor);
+    dimText.setAttribute('dy', i === 0 ? '-1.4em' : i === 2 ? '1.6em' : '0.3em');
+    dimText.setAttribute('fill', 'rgba(180,180,180,0.85)');
+    dimText.setAttribute('font-size', '11');
+    dimText.setAttribute('font-family', "'PingFang SC', 'Microsoft YaHei', sans-serif");
+    dimText.textContent = d.name;
+    svg.appendChild(dimText);
+
+    // 命格值
+    const valText = document.createElementNS(svgNS, 'text');
+    valText.setAttribute('x', lp.x);
+    valText.setAttribute('y', lp.y);
+    valText.setAttribute('text-anchor', anchor);
+    valText.setAttribute('dy', i === 0 ? '-0.3em' : i === 2 ? '2.8em' : '1.5em');
+    valText.setAttribute('fill', '#ff4d4f');
+    valText.setAttribute('font-size', '11');
+    valText.setAttribute('font-weight', '600');
+    valText.setAttribute('font-family', "'PingFang SC', 'Microsoft YaHei', sans-serif");
+    valText.textContent = label;
+    svg.appendChild(valText);
+  });
+
+  container.innerHTML = '';
+  container.appendChild(svg);
+
+  // 动画：从中心展开
+  const duration = 700;
+  const startTime = performance.now();
+
+  function animate(now) {
+    const elapsed = now - startTime;
+    let t = Math.min(elapsed / duration, 1);
+    // easeOutCubic
+    t = 1 - Math.pow(1 - t, 3);
+
+    const animPts = dataPoints.map((p, i) => {
+      const cx2 = CX + (p.x - CX) * t;
+      const cy2 = CY + (p.y - CY) * t;
+      return { x: cx2, y: cy2 };
+    });
+
+    poly.setAttribute('points', animPts.map(p => `${p.x},${p.y}`).join(' '));
+    dots.forEach((dot, i) => {
+      dot.setAttribute('cx', animPts[i].x);
+      dot.setAttribute('cy', animPts[i].y);
+    });
+
+    if (t < 1) requestAnimationFrame(animate);
+  }
+
+  requestAnimationFrame(animate);
+}
+
+// ==================== RADAR CHART (旧版 Canvas，保留供海报使用) ====================
+function drawRadar(scores, animate) {
+  const canvas = document.getElementById('radar-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width;
+  const H = canvas.height;
+  const cx = W / 2;
+  const cy = H / 2;
+  const maxR = Math.min(W, H) * 0.36;
+
+  const dims = [
+    { key: 'LZ', pos: '力量', neg: '智谋' },
+    { key: 'FR', pos: '非人', neg: '人类' },
+    { key: 'SE', pos: '善',   neg: '恶'   },
+    { key: 'YQ', pos: '欲望', neg: '情感' }
+  ];
+  const n = dims.length;
+  const angleStep = (Math.PI * 2) / n;
+  const startAngle = -Math.PI / 2; // 从顶部开始
+
+  // 计算各维度值，映射到 0~1（0=中心，1=边缘）
+  const vals = dims.map(d => {
+    const s = scores[d.key];
+    // -9~9 映射到 0~1
+    return (s + 9) / 18;
+  });
+
+  const duration = animate ? 800 : 0;
+  const startTime = performance.now();
+
+  function render(now) {
+    let t = 1;
+    if (animate) {
+      const elapsed = now - startTime;
+      t = Math.min(elapsed / duration, 1);
+      // easeOutCubic
+      t = 1 - Math.pow(1 - t, 3);
+    }
+
+    ctx.clearRect(0, 0, W, H);
+
+    // 绘制背景网格
+    for (let ring = 1; ring <= 4; ring++) {
+      const r = maxR * (ring / 4);
+      ctx.beginPath();
+      for (let i = 0; i <= n; i++) {
+        const angle = startAngle + angleStep * (i % n);
+        const x = cx + Math.cos(angle) * r;
+        const y = cy + Math.sin(angle) * r;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+      ctx.strokeStyle = ring === 4 ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.05)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+
+    // 绘制轴线
+    for (let i = 0; i < n; i++) {
+      const angle = startAngle + angleStep * i;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + Math.cos(angle) * maxR, cy + Math.sin(angle) * maxR);
+      ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+
+    // 绘制数据区域
+    const animVals = vals.map(v => v * t);
+
+    // 填充
+    ctx.beginPath();
+    for (let i = 0; i <= n; i++) {
+      const idx = i % n;
+      const angle = startAngle + angleStep * idx;
+      const r = Math.max(2, animVals[idx]) * maxR;
+      const x = cx + Math.cos(angle) * r;
+      const y = cy + Math.sin(angle) * r;
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+
+    // 渐变填充
+    const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, maxR);
+    grad.addColorStop(0, 'rgba(230,57,70,0.25)');
+    grad.addColorStop(0.7, 'rgba(230,57,70,0.10)');
+    grad.addColorStop(1, 'rgba(230,57,70,0.03)');
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    // 边框
+    ctx.strokeStyle = 'rgba(230,57,70,0.7)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // 绘制顶点圆点
+    for (let i = 0; i < n; i++) {
+      const angle = startAngle + angleStep * i;
+      const r = Math.max(2, animVals[i]) * maxR;
+      const x = cx + Math.cos(angle) * r;
+      const y = cy + Math.sin(angle) * r;
+
+      // 光晕
+      ctx.beginPath();
+      ctx.arc(x, y, 8, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(230,57,70,0.15)';
+      ctx.fill();
+
+      // 实心点
+      ctx.beginPath();
+      ctx.arc(x, y, 4, 0, Math.PI * 2);
+      ctx.fillStyle = '#e63946';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,0.8)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+
+    // 绘制标签
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    for (let i = 0; i < n; i++) {
+      const angle = startAngle + angleStep * i;
+      const labelR = maxR + 32;
+      const x = cx + Math.cos(angle) * labelR;
+      const y = cy + Math.sin(angle) * labelR;
+
+      // 维度名称
+      ctx.font = '500 22px "PingFang SC", "Microsoft YaHei", sans-serif';
+      ctx.fillStyle = 'rgba(255,255,255,0.7)';
+      const dimNames = ['行事风格', '设定类型', '道德底线', '情感驱动'];
+      ctx.fillText(dimNames[i], x, y - 12);
+
+      // 具体倾向标签
+      const s = scores[dims[i].key];
+      const label = getDimLabel(dims[i].key, s);
+      ctx.font = '20px "PingFang SC", "Microsoft YaHei", sans-serif';
+      ctx.fillStyle = s >= 0 ? 'rgba(230,57,70,0.7)' : 'rgba(120,180,255,0.6)';
+      ctx.fillText(label, x, y + 14);
+    }
+
+    if (animate && t < 1) {
+      requestAnimationFrame(render);
+    }
+  }
+
+  if (animate) {
+    requestAnimationFrame(render);
+  } else {
+    render(startTime);
+  }
+}
+
+// ==================== SHARE / POSTER ====================
+function openShare() {
+  buildPosterDom();
+  const overlay = document.getElementById('share-overlay');
+  overlay.classList.add('show');
+  const wrapper = document.getElementById('poster-canvas-wrapper');
+  wrapper.innerHTML = '<div style="color:#555;text-align:center;padding:40px;font-size:13px">正在生成海报...</div>';
+
+  setTimeout(() => {
+    const dom = document.getElementById('poster-dom');
+    if (typeof html2canvas === 'undefined') {
+      wrapper.innerHTML = '<div style="color:#555;text-align:center;padding:40px;font-size:13px">请截图保存</div>';
+      return;
+    }
+    html2canvas(dom, {
+      backgroundColor: '#0a0a0a', scale: 2, useCORS: true, logging: false
+    }).then(canvas => {
+      const img = document.createElement('img');
+      img.src = canvas.toDataURL('image/png');
+      img.style.width = '100%';
+      wrapper.innerHTML = '';
+      wrapper.appendChild(img);
+    }).catch(() => {
+      wrapper.innerHTML = '<div style="color:#555;text-align:center;padding:40px;font-size:13px">海报生成失败，请截图保存</div>';
+    });
+  }, 100);
+}
+
+function buildPosterDom() {
+  const r = state.result;
+  const scores = state.scores;
+  document.getElementById('p-code').textContent = state.codeStr;
+  document.getElementById('p-char-img').src = 'images/chars/char' + r.id + '.png';
+  document.getElementById('p-char-img').onerror = function() {
+    this.style.display = 'none';
+    var placeholder = document.getElementById('p-char-placeholder');
+    placeholder.style.display = 'flex';
+    document.getElementById('p-placeholder-name').textContent = r.name;
+  };
+  document.getElementById('p-name').textContent = r.name;
+  document.getElementById('p-source').textContent = '《' + r.source + '》';
+  document.getElementById('p-badge').textContent = r.title;
+  document.getElementById('p-desc').textContent = r.desc;
+
+  const dims = [
+    {key:'LZ',pos:'力量',neg:'智谋'},
+    {key:'FR',pos:'非人',neg:'人类'},
+    {key:'SE',pos:'善',  neg:'恶'},
+    {key:'YQ',pos:'欲望',neg:'情感'}
+  ];
+  document.getElementById('p-dims').innerHTML = dims.map(d => {
+    const s = scores[d.key];
+    const half = Math.abs(s) / 9 * 50;
+    const fillStyle = s >= 0
+      ? `left:50%;width:${half}%;`
+      : `right:50%;width:${half}%;`;
+    return `
+      <div class="poster-dim-row">
+        <div class="poster-dim-labels">
+          <span>${d.neg}</span>
+          <span>${getDimLabel(d.key,s)}</span>
+          <span>${d.pos}</span>
+        </div>
+        <div class="poster-dim-track">
+          <div class="poster-dim-fill" style="${fillStyle}"></div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  document.getElementById('p-genres').innerHTML = state.genres.map(g =>
+    `<span class="poster-genre-pill">${g}</span>`
+  ).join('');
+}
+
+function closeShare() {
+  document.getElementById('share-overlay').classList.remove('show');
+}
+
+document.getElementById('share-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeShare();
+});
+
+// ==================== RETEST ====================
+function retest() {
+  // 隐藏底部操作栏
+  const bar = document.getElementById('res-action-bar');
+  if (bar) bar.classList.remove('show');
+
+  state = { gender: null, genres: [], questions: [], currentQ: 0,
+            scores: { LZ: 0, FR: 0, SE: 0, YQ: 0 }, result: null, codeStr: '', answers: [] };
+  ['male','female','misc'].forEach(k =>
+    document.getElementById('card-' + k).classList.remove('selected')
+  );
+  document.getElementById('btn-gender-next').disabled = true;
+  showScreen('screen-start');
+}
+</script>
+</body>
+</html>
