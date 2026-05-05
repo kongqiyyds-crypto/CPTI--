@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>CPTI · 网文人格推演测试</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<!-- 分享卡片使用纯CSS，无需html2canvas -->
 <style>
 /* ========== RESET & BASE ========== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -1656,78 +1656,229 @@ html, body {
 }
 .btn-result-share:active { opacity: 0.85; }
 
-/* ========== SHARE OVERLAY ========== */
+/* ========== SHARE CARD (游戏风UI卡片) ========== */
 #share-overlay {
   position: fixed; inset: 0;
-  background: rgba(0,0,0,0.9);
+  background: rgba(0,0,0,0.85);
   z-index: 100;
   display: none; align-items: center; justify-content: center;
   flex-direction: column;
+  overflow-y: auto;
+  padding: 20px 0;
 }
 #share-overlay.show { display: flex; }
-.poster-container {
-  max-width: 320px; width: 90%;
-  border-radius: 16px; overflow: hidden;
-}
-#poster-canvas-wrapper {
-  width: 100%; border-radius: 16px; overflow: hidden;
-  box-shadow: 0 8px 40px rgba(0,0,0,0.8);
-}
-#poster-canvas-wrapper img { width: 100%; display: block; }
-.share-hint { color: #555; font-size: 13px; margin-top: 16px; }
-.share-btns { display: flex; gap: 12px; margin-top: 16px; }
 
-/* ========== HIDDEN POSTER DOM ========== */
-#poster-dom {
-  position: fixed; left: -9999px; top: 0;
-  width: 375px; background: #0a0a0a;
-  padding: 36px 28px 32px;
-  font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+/* 卡片主体 */
+.share-card {
+  width: min(360px, 92vw);
+  background: linear-gradient(160deg, #12131c 0%, #0d0e18 60%, #0a0b14 100%);
+  border: 1px solid rgba(160,170,220,0.18);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 0 60px rgba(100,120,200,0.15), 0 20px 60px rgba(0,0,0,0.6);
+  position: relative;
 }
-.poster-glow {
-  position: absolute; inset: 0;
-  background: radial-gradient(ellipse 300px 300px at 50% 40%, rgba(255,255,255,0.05) 0%, transparent 70%);
+
+/* 卡片顶部光效 */
+.share-card::before {
+  content: '';
+  position: absolute;
+  top: -30px; left: 50%; transform: translateX(-50%);
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(140,160,255,0.12) 0%, transparent 70%);
   pointer-events: none;
 }
-.poster-header { text-align: center; margin-bottom: 20px; }
-.poster-product-name { font-size: 12px; color: #444; letter-spacing: 4px; }
-.poster-divider { width: 40px; height: 1px; background: rgba(255,255,255,0.1); margin: 8px auto; }
-.poster-code { text-align: center; margin-bottom: 20px; }
-.poster-code-value { font-size: 18px; font-weight: 700; color: #fff; letter-spacing: 1px; word-break: break-all; }
-.poster-code-label { font-size: 11px; color: #444; margin-top: 6px; letter-spacing: 2px; }
-.poster-char-wrap {
-  display: flex; align-items: center; gap: 16px; margin-bottom: 16px;
+
+/* 头部 */
+.sc-header {
+  padding: 20px 20px 12px;
+  text-align: center;
+  border-bottom: 1px solid rgba(160,170,220,0.08);
 }
-.poster-char-img {
-  width: 80px; height: 110px; object-fit: contain; flex-shrink: 0;
-  border-radius: 6px;
+.sc-brand {
+  font-size: 13px;
+  color: rgba(160,170,220,0.6);
+  letter-spacing: 3px;
 }
-.poster-char-text {
-  display: flex; flex-direction: column; align-items: flex-start;
+.sc-brand-sub {
+  font-size: 9px;
+  color: rgba(160,170,220,0.3);
+  letter-spacing: 2px;
+  margin-top: 3px;
 }
-.poster-char-name { font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 2px; }
-.poster-char-source { font-size: 12px; color: #444; margin-bottom: 8px; }
-.poster-char-badge {
-  display: inline-block; padding: 2px 10px;
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 10px; font-size: 11px; color: #555;
-  margin-bottom: 10px;
+
+/* 命格代码 */
+.sc-code-block {
+  padding: 14px 20px 10px;
+  text-align: center;
 }
-.poster-char-desc {
-  font-size: 13px; color: #555; line-height: 1.7;
-  display: -webkit-box; -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical; overflow: hidden;
+.sc-code-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 6px;
+  font-family: 'Courier New', monospace;
+  text-shadow: 0 0 20px rgba(160,170,255,0.4);
+}
+.sc-code-label {
+  font-size: 10px;
+  color: rgba(160,170,220,0.35);
+  letter-spacing: 3px;
+  margin-top: 4px;
+}
+
+/* 角色卡片 */
+.sc-char-card {
+  margin: 0 16px 16px;
+  background: linear-gradient(135deg, rgba(160,170,220,0.06) 0%, rgba(160,170,220,0.02) 100%);
+  border: 1px solid rgba(160,170,220,0.12);
+  border-radius: 12px;
+  padding: 18px;
+  position: relative;
+}
+
+/* 角色光效 */
+.sc-char-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  background: radial-gradient(ellipse 80px 80px at 50% 0%, rgba(160,170,255,0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.sc-char-info {
+  text-align: center;
   margin-bottom: 16px;
+  position: relative;
 }
-.poster-dims { margin-bottom: 14px; }
-.poster-dim-row { margin-bottom: 8px; }
-.poster-dim-labels { display: flex; justify-content: space-between; font-size: 11px; color: #444; margin-bottom: 4px; }
-.poster-dim-track { height: 3px; background: rgba(255,255,255,0.07); border-radius: 2px; overflow: hidden; position: relative; }
-.poster-dim-fill { height: 100%; position: absolute; background: rgba(255,255,255,0.4); border-radius: 2px; }
-.poster-genres { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-.poster-genre-pill { padding: 3px 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); font-size: 11px; color: #444; }
-.poster-footer { text-align: center; }
-.poster-cta { font-size: 11px; color: #333; letter-spacing: 1px; }
+
+.sc-char-badge {
+  display: inline-block;
+  font-size: 10px;
+  color: rgba(160,170,220,0.7);
+  background: rgba(160,170,220,0.08);
+  border: 1px solid rgba(160,170,220,0.15);
+  padding: 2px 10px;
+  border-radius: 10px;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+.sc-char-name {
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 4px;
+  text-shadow: 0 0 30px rgba(160,170,255,0.3);
+}
+.sc-char-source {
+  font-size: 12px;
+  color: rgba(200,210,255,0.5);
+  margin-top: 4px;
+  letter-spacing: 1px;
+}
+.sc-char-desc {
+  font-size: 12px;
+  color: rgba(160,170,220,0.6);
+  line-height: 1.6;
+  margin-top: 10px;
+  padding: 0 4px;
+}
+
+/* 四维属性 */
+.sc-attrs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 14px;
+  position: relative;
+}
+
+.sc-attr {
+  background: rgba(0,0,0,0.25);
+  border: 1px solid rgba(160,170,220,0.08);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+.sc-attr-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+}
+.sc-attr-label {
+  font-size: 11px;
+  color: rgba(160,170,220,0.7);
+  letter-spacing: 1px;
+}
+.sc-attr-val {
+  font-size: 12px;
+  color: #fff;
+  font-weight: 600;
+}
+.sc-attr-track {
+  height: 4px;
+  background: rgba(160,170,220,0.1);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 3px;
+}
+.sc-attr-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, rgba(140,160,255,0.8), rgba(160,170,255,0.5));
+  transition: width 0.6s ease;
+}
+.sc-attr-sub {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  color: rgba(160,170,220,0.25);
+}
+
+/* 流派标签 */
+.sc-genres {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  position: relative;
+}
+.sc-genres::before {
+  content: '';
+  position: absolute;
+  top: -8px; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(160,170,220,0.1), transparent);
+}
+.sc-genre-tag {
+  font-size: 10px;
+  color: rgba(160,170,220,0.6);
+  background: rgba(160,170,220,0.06);
+  border: 1px solid rgba(160,170,220,0.12);
+  padding: 2px 8px;
+  border-radius: 6px;
+  letter-spacing: 0.5px;
+}
+
+/* 底部 */
+.sc-footer {
+  padding: 14px 20px 18px;
+  text-align: center;
+  border-top: 1px solid rgba(160,170,220,0.06);
+}
+.sc-cta {
+  font-size: 12px;
+  color: rgba(160,170,220,0.4);
+  letter-spacing: 2px;
+}
+.sc-qr-hint {
+  font-size: 10px;
+  color: rgba(160,170,220,0.25);
+  margin-top: 4px;
+}
+
+.share-btns { display: flex; gap: 12px; justify-content: center; margin-top: 16px; }
 
 /* ========== MOBILE RESPONSIVE ========== */
 @media (max-width: 480px) {
@@ -1813,16 +1964,16 @@ html, body {
     <div class="start-hero">
       <div class="start-chars">
         <div class="char-figure" id="char-left">
-          <img src="char-left.png" alt="克莱恩">
+          <img src="char-left.webp" alt="克莱恩">
         </div>
         <div class="char-figure mid" id="char-mid">
-          <img src="char-mid.png" alt="杨间">
+          <img src="char-mid.webp" alt="杨间">
         </div>
         <div class="char-figure" id="char-right">
-          <img src="char-right.png" alt="李火旺">
+          <img src="char-right.webp" alt="李火旺">
         </div>
       </div>
-      <img class="start-title-img" src="title.png" alt="网文角色测试">
+      <img class="start-title-img" src="title.webp" alt="网文角色测试">
       <div class="start-desc">12道题 · 四维坐标 · 60位经典角色<br>找到你的网文命格</div>
       <div class="start-dots">
         <div class="dot active"></div>
@@ -2140,43 +2291,78 @@ html, body {
 
 <!-- ===== 分享浮层 ===== -->
 <div id="share-overlay">
-  <div class="poster-container">
-    <div id="poster-canvas-wrapper"></div>
-  </div>
-  <div class="share-hint">长按图片保存到相册</div>
-  <div class="share-btns">
-    <button class="btn-secondary" onclick="closeShare()" style="padding:10px 28px;font-size:14px">关闭</button>
-  </div>
-</div>
+  <div class="share-card" id="share-card">
+    <!-- 卡片头部：品牌名 -->
+    <div class="sc-header">
+      <div class="sc-brand">CPTI · 网文人格推演</div>
+      <div class="sc-brand-sub">NET-NOVEL PERSONALITY TEST</div>
+    </div>
 
-<!-- ===== 隐藏海报 DOM ===== -->
-<div id="poster-dom">
-  <div class="poster-glow"></div>
-  <div class="poster-header">
-    <div class="poster-product-name">CPTI · 网文人格推演</div>
-    <div class="poster-divider"></div>
-  </div>
-  <div class="poster-code">
-    <div class="poster-code-value" id="p-code"></div>
-    <div class="poster-code-label">我的网文命格</div>
-  </div>
-  <div class="poster-char-wrap" id="p-char-wrap">
-    <img class="poster-char-img" id="p-char-img" src="" alt="" onerror="this.style.display='none'; document.getElementById('p-char-placeholder').style.display='flex';">
-    <div id="p-char-placeholder" style="display:none; width:180px;height:240px; background:linear-gradient(135deg,rgba(160,170,200,0.3),rgba(160,170,200,0.1)); border-radius:12px; align-items:center; justify-content:center; flex-direction:column; color:rgba(200,210,230,0.7); font-size:14px;">
-      <div style="font-size:48px; margin-bottom:8px;">🎭</div>
-      <div id="p-placeholder-name"></div>
+    <!-- 命格代码 -->
+    <div class="sc-code-block">
+      <div class="sc-code-value" id="sc-code"></div>
+      <div class="sc-code-label">我的网文命格</div>
     </div>
-    <div class="poster-char-text">
-      <div class="poster-char-name" id="p-name"></div>
-      <div class="poster-char-source" id="p-source"></div>
-      <div class="poster-char-badge" id="p-badge"></div>
+
+    <!-- 角色卡片主体 -->
+    <div class="sc-char-card">
+      <!-- 角色信息区 -->
+      <div class="sc-char-info">
+        <div class="sc-char-badge" id="sc-badge"></div>
+        <div class="sc-char-name" id="sc-name"></div>
+        <div class="sc-char-source" id="sc-source"></div>
+        <div class="sc-char-desc" id="sc-desc"></div>
+      </div>
+
+      <!-- 四维属性区 -->
+      <div class="sc-attrs">
+        <div class="sc-attr" id="sc-attr-lz">
+          <div class="sc-attr-row">
+            <span class="sc-attr-label">力量</span>
+            <span class="sc-attr-val" id="sc-attr-lz-val"></span>
+          </div>
+          <div class="sc-attr-track"><div class="sc-attr-fill" id="sc-attr-lz-fill"></div></div>
+          <div class="sc-attr-sub"><span>智谋</span><span>非人</span></div>
+        </div>
+        <div class="sc-attr" id="sc-attr-fr">
+          <div class="sc-attr-row">
+            <span class="sc-attr-label">非人</span>
+            <span class="sc-attr-val" id="sc-attr-fr-val"></span>
+          </div>
+          <div class="sc-attr-track"><div class="sc-attr-fill" id="sc-attr-fr-fill"></div></div>
+          <div class="sc-attr-sub"><span>人类</span><span>超凡</span></div>
+        </div>
+        <div class="sc-attr" id="sc-attr-se">
+          <div class="sc-attr-row">
+            <span class="sc-attr-label">善恶</span>
+            <span class="sc-attr-val" id="sc-attr-se-val"></span>
+          </div>
+          <div class="sc-attr-track"><div class="sc-attr-fill" id="sc-attr-se-fill"></div></div>
+          <div class="sc-attr-sub"><span>至善</span><span>至恶</span></div>
+        </div>
+        <div class="sc-attr" id="sc-attr-yq">
+          <div class="sc-attr-row">
+            <span class="sc-attr-label">欲望</span>
+            <span class="sc-attr-val" id="sc-attr-yq-val"></span>
+          </div>
+          <div class="sc-attr-track"><div class="sc-attr-fill" id="sc-attr-yq-fill"></div></div>
+          <div class="sc-attr-sub"><span>情感</span><span>理性</span></div>
+        </div>
+      </div>
+
+      <!-- 流派标签 -->
+      <div class="sc-genres" id="sc-genres"></div>
+    </div>
+
+    <!-- 底部CTA -->
+    <div class="sc-footer">
+      <div class="sc-cta">来测测你的网文命格</div>
+      <div class="sc-qr-hint">长按截图保存卡片</div>
     </div>
   </div>
-  <div class="poster-char-desc" id="p-desc"></div>
-  <div class="poster-dims" id="p-dims"></div>
-  <div class="poster-genres" id="p-genres"></div>
-  <div class="poster-footer">
-    <div class="poster-cta">来测测你的网文命格</div>
+
+  <div class="share-btns" style="margin-top:20px">
+    <button class="btn-secondary" onclick="closeShare()" style="padding:10px 28px;font-size:14px">关闭</button>
   </div>
 </div>
 
@@ -2328,11 +2514,11 @@ const CHARS = {
     {id:50,name:"赵云澜",source:"镇魂",title:"特调之心",coords:{LZ:3,FR:-5,SE:5,YQ:-7},tags:["镇魂","特调","守护","成长"],desc:"你是纯爱文里最可靠的特调。你看起来普通，但内心深处始终保留着对沈巍的守护和对真相的追求。"},
     {id:51,name:"贺朝",source:"全球高考",title:"骚话藏真",coords:{LZ:-1,FR:-7,SE:6,YQ:-8},tags:["全球高考","骚话","守护","嘴贱心软"],desc:"你是无限流文里最有趣的男主。你用骚话和守护对抗着命运，嘴贱心软是你的标签，守护才是你的本质。"},
     {id:52,name:"费渡",source:"默读",title:"深渊猎手",coords:{LZ:-7,FR:4,SE:-4,YQ:-7},tags:["默读","深渊","智谋","守护"],desc:"你是悬疑文里最深不可测的猎手。优雅的外表下藏着深渊，却用自己的方式守护着在乎的人。算计与深情并存，让人无法看透。"},
-    {id:53,name:"谢俞",source:"默读",title:"沉默侦探",coords:{LZ:-2,FR:-6,SE:7,YQ:-6},tags:["默读","侦探","守护","沉默"],desc:"你是悬疑文里最沉默的侦探。用逻辑和沉默拨开每一层迷雾，守护着那些无法发声的人。你的内心比任何人都更敏感，却选择用冷静包裹所有情绪。"},
+    {id:53,name:"谢俞",source:"伪装学渣",title:"沉默侦探",coords:{LZ:-2,FR:-6,SE:7,YQ:-6},tags:["伪装学渣","侦探","守护","沉默"],desc:"你是校园文里最沉默的学霸。用逻辑和沉默拨开每一层迷雾，守护着那些无法发声的人。你的内心比任何人都更敏感，却选择用冷静包裹所有情绪。"},
     {id:54,name:"苏梦枕",source:"庆余年",title:"侠骨温柔",coords:{LZ:5,FR:-3,SE:6,YQ:-6},tags:["庆余年","侠骨","温柔","守护"],desc:"你是古代文里最有侠气的人物。表面温柔如玉，内里侠骨铮铮。你用自己的方式守护着在乎的人，那份温柔与坚定让人难以抗拒。"},
     {id:55,name:"桑桑",source:"将夜",title:"天道之殇",coords:{LZ:9,FR:9,SE:-1,YQ:-8},tags:["将夜","天道","守护","命运"],desc:"你是仙侠文里最悲情的存在。从小侍女到天道，你的命运充满了矛盾与挣扎。你内心深处始终保留着对宁缺的守护，用最朴素的情感对抗着最宏大的命运。"},
     {id:56,name:"江停",source:"破云",title:"缉毒之刃",coords:{LZ:3,FR:-7,SE:8,YQ:-5},tags:["破云","缉毒","守护","正义"],desc:"你是悬疑文里最可靠的警察。你用缉毒和守护对抗着黑暗，哪怕满身伤痕也要守护那一份光明。"},
-    {id:57,name:"江澄",source:"陈情令",title:"紫电三毒",coords:{LZ:7,FR:-3,SE:6,YQ:-6},tags:["陈情令","傲娇","守护","意难平"],desc:"你是仙侠文里最傲娇的宗主。嘴上说着狠话，内心却始终守护着你在乎的人。那份傲娇下的深情，是最让人意难平的存在。"},
+    {id:57,name:"江澄",source:"魔道祖师",title:"紫电三毒",coords:{LZ:7,FR:-3,SE:6,YQ:-6},tags:["魔道祖师","傲娇","守护","意难平"],desc:"你是仙侠文里最傲娇的宗主。嘴上说着狠话，内心却始终守护着你在乎的人。那份傲娇下的深情，是最让人意难平的存在。"},
     {id:58,name:"游惑",source:"全球高考",title:"系统之外",coords:{LZ:0,FR:5,SE:3,YQ:-7},tags:["全球高考","系统","神秘","守护"],desc:"你是无限流文里最神秘的男主。你看起来普通，但内心深处始终保留着对贺朝的守护，神秘的存在背后藏着无尽深情。"},
     {id:59,name:"段嘉许",source:"偷偷藏不住",title:"暗恋成真",coords:{LZ:3,FR:-4,SE:7,YQ:-8},tags:["偷偷藏不住","暗恋","温柔","治愈"],desc:"你是校园甜宠文里最温柔的男主。你的暗恋是小心翼翼的温柔，喜欢一个人就愿意为她扛下所有。偷偷藏不住的不只是秘密，还有那份跨越时光的深情。"},
     {id:60,name:"盛望",source:"伪装学渣",title:"学渣伪装",coords:{LZ:-5,FR:6,SE:5,YQ:-8},tags:["伪装学渣","校园","成长","治愈"],desc:"你是校园文里最倔强的少年。从伪装学渣到真正学霸，你用努力和守护书写着青春。偷偷变好的不只是成绩，还有那份与江添并肩的时光。"}
@@ -2392,9 +2578,9 @@ function showScreen(id) {
 
 // ==================== CHAR CAROUSEL ====================
 const charSlides = [
-  { left: 'char-left.png',  leftAlt: '克莱恩', mid: 'char-mid.png',  midAlt: '杨间', right: 'char-right.png', rightAlt: '李火旺' },
-  { left: 'char-right.png', leftAlt: '李火旺', mid: 'char-left.png',  midAlt: '克莱恩', right: 'char-mid.png', rightAlt: '杨间' },
-  { left: 'char-mid.png',   leftAlt: '杨间',   mid: 'char-right.png', midAlt: '李火旺', right: 'char-left.png', rightAlt: '克莱恩' },
+  { left: 'char-left.webp',  leftAlt: '克莱恩', mid: 'char-mid.webp',  midAlt: '杨间', right: 'char-right.webp', rightAlt: '李火旺' },
+  { left: 'char-right.webp', leftAlt: '李火旺', mid: 'char-left.webp',  midAlt: '克莱恩', right: 'char-mid.webp', rightAlt: '杨间' },
+  { left: 'char-mid.webp',   leftAlt: '杨间',   mid: 'char-right.webp', midAlt: '李火旺', right: 'char-left.webp', rightAlt: '克莱恩' },
 ];
 let charSlideIndex = 0;
 let charAnimating = false;
@@ -2777,7 +2963,7 @@ function renderResult() {
     <div class="result-block res-portrait-wrap" id="rb-portrait">
       <div class="res-portrait-glow"></div>
       <div class="res-portrait-img-wrap">
-        <img src="images/chars/char${r.id}.png" alt="${r.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <img src="images/chars/char${r.id}.webp" alt="${r.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
         <div class="char-placeholder" style="display:none; width:180px;height:240px; background:linear-gradient(135deg,rgba(160,170,200,0.2),rgba(160,170,200,0.05)); border-radius:12px; align-items:center; justify-content:center; flex-direction:column; color:rgba(200,210,230,0.6); font-size:14px;">
           <div style="font-size:48px; margin-bottom:8px;">🎭</div>
           <div>${r.name}</div>
@@ -3256,77 +3442,44 @@ function drawRadar(scores, animate) {
 
 // ==================== SHARE / POSTER ====================
 function openShare() {
-  buildPosterDom();
   const overlay = document.getElementById('share-overlay');
   overlay.classList.add('show');
-  const wrapper = document.getElementById('poster-canvas-wrapper');
-  wrapper.innerHTML = '<div style="color:#555;text-align:center;padding:40px;font-size:13px">正在生成海报...</div>';
+  document.body.scrollIntoView({ block: 'start' });
 
-  setTimeout(() => {
-    const dom = document.getElementById('poster-dom');
-    if (typeof html2canvas === 'undefined') {
-      wrapper.innerHTML = '<div style="color:#555;text-align:center;padding:40px;font-size:13px">请截图保存</div>';
-      return;
-    }
-    html2canvas(dom, {
-      backgroundColor: '#0a0a0a', scale: 2, useCORS: true, logging: false
-    }).then(canvas => {
-      const img = document.createElement('img');
-      img.src = canvas.toDataURL('image/png');
-      img.style.width = '100%';
-      wrapper.innerHTML = '';
-      wrapper.appendChild(img);
-    }).catch(() => {
-      wrapper.innerHTML = '<div style="color:#555;text-align:center;padding:40px;font-size:13px">海报生成失败，请截图保存</div>';
-    });
-  }, 100);
+  const r = state.result;
+  const scores = state.scores;
+
+  // 填充卡片内容
+  document.getElementById('sc-code').textContent = state.codeStr;
+  document.getElementById('sc-badge').textContent = r.title;
+  document.getElementById('sc-name').textContent = r.name;
+  document.getElementById('sc-source').textContent = '《' + r.source + '》';
+  document.getElementById('sc-desc').textContent = r.desc;
+
+  // 四维属性
+  const dims = [
+    {key: 'LZ', pos: '力量', neg: '智谋'},
+    {key: 'FR', pos: '非人', neg: '人类'},
+    {key: 'SE', pos: '善',   neg: '恶'},
+    {key: 'YQ', pos: '欲望', neg: '情感'}
+  ];
+  dims.forEach(d => {
+    const s = scores[d.key];
+    // 数值范围 -9 ~ 9，映射到百分比
+    const pct = Math.max(5, Math.min(95, 50 + (s / 9) * 45));
+    document.getElementById('sc-attr-' + d.key + '-fill').style.width = pct + '%';
+    document.getElementById('sc-attr-' + d.key + '-val').textContent = s > 0 ? '+' + s : s;
+  });
+
+  // 流派标签
+  document.getElementById('sc-genres').innerHTML = state.genres.map(g =>
+    `<span class="sc-genre-tag">${g}</span>`
+  ).join('');
 }
 
 function buildPosterDom() {
-  const r = state.result;
-  const scores = state.scores;
-  document.getElementById('p-code').textContent = state.codeStr;
-  document.getElementById('p-char-img').src = 'images/chars/char' + r.id + '.png';
-  document.getElementById('p-char-img').onerror = function() {
-    this.style.display = 'none';
-    var placeholder = document.getElementById('p-char-placeholder');
-    placeholder.style.display = 'flex';
-    document.getElementById('p-placeholder-name').textContent = r.name;
-  };
-  document.getElementById('p-name').textContent = r.name;
-  document.getElementById('p-source').textContent = '《' + r.source + '》';
-  document.getElementById('p-badge').textContent = r.title;
-  document.getElementById('p-desc').textContent = r.desc;
-
-  const dims = [
-    {key:'LZ',pos:'力量',neg:'智谋'},
-    {key:'FR',pos:'非人',neg:'人类'},
-    {key:'SE',pos:'善',  neg:'恶'},
-    {key:'YQ',pos:'欲望',neg:'情感'}
-  ];
-  document.getElementById('p-dims').innerHTML = dims.map(d => {
-    const s = scores[d.key];
-    const half = Math.abs(s) / 9 * 50;
-    const fillStyle = s >= 0
-      ? `left:50%;width:${half}%;`
-      : `right:50%;width:${half}%;`;
-    return `
-      <div class="poster-dim-row">
-        <div class="poster-dim-labels">
-          <span>${d.neg}</span>
-          <span>${getDimLabel(d.key,s)}</span>
-          <span>${d.pos}</span>
-        </div>
-        <div class="poster-dim-track">
-          <div class="poster-dim-fill" style="${fillStyle}"></div>
-        </div>
-      </div>
-    `;
-  }).join('');
-
-  document.getElementById('p-genres').innerHTML = state.genres.map(g =>
-    `<span class="poster-genre-pill">${g}</span>`
-  ).join('');
+  // 已弃用，保留函数签名避免报错
+  return Promise.resolve();
 }
 
 function closeShare() {
